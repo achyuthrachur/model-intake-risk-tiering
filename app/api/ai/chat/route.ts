@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Create streaming response
-    const result = streamText({
+    const result = await streamText({
       model: getModel(),
       system: CHATBOT_SYSTEM_PROMPT + '\n\n' + contextPrompt,
       messages: messages.map((m: { role: string; content: string }) => ({
