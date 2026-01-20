@@ -5,7 +5,8 @@
       "Bash(find:*)",
       "Bash(grep:*)",
       "Bash(npm install:*)",
-      "Bash(powershell -Command \"cd ''c:\\\\Users\\\\rachura\\\\OneDrive - Crowe LLP\\\\VS Code Programming Projects\\\\model-intake-risk-tiering''; npm install ai @ai-sdk/openai\")"
+      "Bash(powershell -Command \"cd ''c:\\\\Users\\\\rachura\\\\OneDrive - Crowe LLP\\\\VS Code Programming Projects\\\\model-intake-risk-tiering''; npm install ai @ai-sdk/openai\")",
+      "Bash(npx tsc:*)"
     ]
   }
 }

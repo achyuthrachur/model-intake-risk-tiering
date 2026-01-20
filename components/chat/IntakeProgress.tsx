@@ -173,7 +173,7 @@ export function IntakeProgress({ data }: IntakeProgressProps) {
                 <div className="ml-6 mt-1 space-y-1">
                   {group.fields.map((field) => {
                     const isCollected = isFieldCollected(field);
-                    const isRequired = group.required.includes(field as any);
+                    const isRequired = (group.required as readonly string[]).includes(field);
 
                     return (
                       <div
