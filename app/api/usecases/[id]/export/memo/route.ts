@@ -63,7 +63,7 @@ export async function GET(
     // Return file
     const filename = `${useCase.title.replace(/[^a-z0-9]/gi, '_')}_memo.docx`;
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type':
           'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
