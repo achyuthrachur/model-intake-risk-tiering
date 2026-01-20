@@ -339,7 +339,7 @@ modelDefinitionCriteria:
       field: "modelDefinitionTrigger"
       operator: "eq"
       value: true
-    result: "Model"
+    result: "Yes"
 
   - id: "MD_QUANTITATIVE_METHOD"
     name: "Quantitative Method"
@@ -348,7 +348,7 @@ modelDefinitionCriteria:
       field: "aiType"
       operator: "in"
       value: ["Traditional ML", "GenAI", "Hybrid"]
-    result: "Model"
+    result: "Yes"
 
   - id: "MD_DECISIONING"
     name: "Decisioning Use"
@@ -357,7 +357,7 @@ modelDefinitionCriteria:
       field: "usageType"
       operator: "eq"
       value: "Decisioning"
-    result: "Model"
+    result: "Yes"
 
   - id: "MD_SCORING"
     name: "Produces Scores"
@@ -370,4 +370,4 @@ modelDefinitionCriteria:
         - field: "aiType"
           operator: "neq"
           value: "Rules"
-    result: "Model"
+    result: "Yes"

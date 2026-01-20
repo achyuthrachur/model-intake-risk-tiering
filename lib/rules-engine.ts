@@ -149,10 +149,10 @@ function determineIsModel(data: Record<string, any>): IsModel {
 
   for (const criterion of config.modelDefinitionCriteria || []) {
     if (evaluateCondition(criterion.conditions, data)) {
-      if (criterion.result === 'Model') {
+      if (criterion.result === 'Yes') {
         return 'Yes';
       }
-      if (criterion.result === 'Model-like' && isModel !== 'Yes') {
+      if (criterion.result === 'Model-like') {
         isModel = 'Model-like';
       }
     }
@@ -245,7 +245,7 @@ function detectMissingEvidence(
   });
 
   // Remove duplicates
-  return [...new Set(missing)];
+  return Array.from(new Set(missing));
 }
 
 // Generate rationale summary
