@@ -1,0 +1,256 @@
+// Domain types for the Model Intake Risk Tiering application
+
+export type AIType = 'Traditional ML' | 'GenAI' | 'Rules' | 'Hybrid';
+export type UsageType = 'Decisioning' | 'Advisory' | 'Automation';
+export type HumanInLoop = 'Required' | 'Optional' | 'None';
+export type CustomerImpact = 'Direct' | 'Indirect' | 'None';
+export type Deployment = 'Internal tool' | 'Customer-facing' | '3rd-party' | 'Embedded';
+export type TrainingDataSource = 'Internal' | 'Vendor' | 'Public' | 'Unknown' | 'N/A';
+export type ChangeFrequency = 'Ad hoc' | 'Quarterly' | 'Monthly' | 'Continuous';
+export type MonitoringCadence = 'Daily' | 'Weekly' | 'Monthly' | 'Quarterly' | 'None';
+export type UseCaseStatus = 'Draft' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
+export type Tier = 'T1' | 'T2' | 'T3';
+export type IsModel = 'Yes' | 'No' | 'Model-like';
+
+export const REGULATORY_DOMAINS = [
+  'AML',
+  'BSA',
+  'Lending',
+  'Credit',
+  'Privacy',
+  'Consumer Protection',
+  'Securities',
+  'Insurance',
+  'UDAAP',
+  'CRA',
+  'ECOA',
+  'FCRA',
+  'GLBA',
+] as const;
+
+export type RegulatoryDomain = typeof REGULATORY_DOMAINS[number];
+
+export const BUSINESS_LINES = [
+  'Retail Banking',
+  'Commercial Banking',
+  'Wealth Management',
+  'Credit',
+  'Lending',
+  'Underwriting',
+  'AML',
+  'Fraud',
+  'Operations',
+  'Marketing',
+  'Customer Service',
+  'Risk Management',
+  'Compliance',
+  'IT',
+  'Human Resources',
+] as const;
+
+export type BusinessLine = typeof BUSINESS_LINES[number];
+
+export const ATTACHMENT_TYPES = [
+  'Business one-pager',
+  'Architecture diagram',
+  'Vendor doc',
+  'Data dictionary',
+  'Test results',
+  'Model documentation',
+  'Other',
+] as const;
+
+export type AttachmentType = typeof ATTACHMENT_TYPES[number];
+
+// Form data types
+export interface UseCaseFormData {
+  // Overview
+  title: string;
+  businessLine: string;
+  description: string;
+  intendedUsers?: string;
+
+  // Use & Impact
+  usageType: UsageType;
+  customerImpact: CustomerImpact;
+  humanInLoop: HumanInLoop;
+  downstreamDecisions?: string;
+
+  // AI / Model Details
+  aiType: AIType;
+  deployment: Deployment;
+  vendorInvolved: boolean;
+  vendorName?: string;
+  modelDefinitionTrigger: boolean;
+  explainabilityRequired: boolean;
+  changeFrequency?: ChangeFrequency;
+  retraining: boolean;
+  overridesAllowed: boolean;
+  fallbackPlanDefined: boolean;
+
+  // Data & Privacy
+  containsPii: boolean;
+  containsNpi: boolean;
+  sensitiveAttributesUsed: boolean;
+  trainingDataSource?: TrainingDataSource;
+  retentionPolicyDefined: boolean;
+  loggingRequired: boolean;
+  accessControlsDefined: boolean;
+
+  // Regulatory
+  regulatoryDomains: string[];
+
+  // Controls & Monitoring
+  monitoringCadence?: MonitoringCadence;
+  humanReviewProcess?: string;
+  incidentResponseContact?: string;
+}
+
+// Rules Engine types
+export interface RuleCondition {
+  field?: string;
+  operator?: 'eq' | 'neq' | 'in' | 'notIn' | 'contains' | 'notEmpty' | 'gt' | 'lt' | 'gte' | 'lte';
+  value?: any;
+  all?: RuleCondition[];
+  any?: RuleCondition[];
+}
+
+export interface RuleEffects {
+  addRequiredArtifacts: string[];
+  addRiskFlags: string[];
+  triggeredCriteria: string;
+}
+
+export interface Rule {
+  id: string;
+  name: string;
+  description: string;
+  tier: Tier;
+  conditions: RuleCondition;
+  effects: RuleEffects;
+}
+
+export interface TierDefinition {
+  name: string;
+  description: string;
+  color: string;
+  severity: number;
+}
+
+export interface RulesConfig {
+  tiers: Record<Tier, TierDefinition>;
+  defaultTier: Tier;
+  rules: Rule[];
+  modelDefinitionCriteria: Array<{
+    id: string;
+    name: string;
+    description: string;
+    conditions: RuleCondition;
+    result: IsModel;
+  }>;
+}
+
+// Artifact types
+export interface ArtifactDefinition {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  ownerRole: string;
+  whatGoodLooksLike: string;
+  requiredForTiers: Tier[];
+}
+
+export interface ArtifactCategory {
+  order: number;
+  description: string;
+}
+
+export interface ArtifactsConfig {
+  artifacts: Record<string, ArtifactDefinition>;
+  categories: Record<string, ArtifactCategory>;
+}
+
+// Decision output
+export interface DecisionResult {
+  isModel: IsModel;
+  tier: Tier;
+  triggeredRules: Array<{
+    id: string;
+    name: string;
+    tier: Tier;
+    triggeredCriteria: string;
+  }>;
+  rationaleSummary: string;
+  requiredArtifacts: string[];
+  missingEvidence: string[];
+  riskFlags: string[];
+}
+
+// API response types
+export interface UseCaseWithRelations {
+  id: string;
+  title: string;
+  businessLine: string;
+  description: string;
+  aiType: string;
+  usageType: string;
+  humanInLoop: string;
+  customerImpact: string;
+  regulatoryDomains: string;
+  deployment: string;
+  vendorInvolved: boolean;
+  vendorName: string | null;
+  intendedUsers: string | null;
+  downstreamDecisions: string | null;
+  containsPii: boolean;
+  containsNpi: boolean;
+  sensitiveAttributesUsed: boolean;
+  trainingDataSource: string | null;
+  retentionPolicyDefined: boolean;
+  loggingRequired: boolean;
+  accessControlsDefined: boolean;
+  modelDefinitionTrigger: boolean;
+  explainabilityRequired: boolean;
+  changeFrequency: string | null;
+  retraining: boolean;
+  overridesAllowed: boolean;
+  fallbackPlanDefined: boolean;
+  monitoringCadence: string | null;
+  humanReviewProcess: string | null;
+  incidentResponseContact: string | null;
+  status: string;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  decision?: {
+    id: string;
+    isModel: string;
+    tier: string;
+    triggeredRules: string;
+    rationaleSummary: string;
+    requiredArtifacts: string;
+    missingEvidence: string;
+    riskFlags: string;
+    generatedDocuments: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null;
+  attachments?: Array<{
+    id: string;
+    filename: string;
+    type: string;
+    storagePath: string;
+    fileSize: number | null;
+    mimeType: string | null;
+    createdAt: Date;
+  }>;
+  auditEvents?: Array<{
+    id: string;
+    actor: string;
+    eventType: string;
+    details: string | null;
+    diffSummary: string | null;
+    timestamp: Date;
+  }>;
+}

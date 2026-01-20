@@ -1,0 +1,433 @@
+# Artifact Requirements Configuration
+# Defines required documentation artifacts by tier and trigger
+
+artifacts:
+  # ============================================
+  # POLICY & GOVERNANCE
+  # ============================================
+
+  UseCaseInventoryEntry:
+    id: "UseCaseInventoryEntry"
+    name: "Use Case Inventory Entry"
+    category: "Policy"
+    description: "Documented entry in the AI/ML use case inventory"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Complete inventory record with business purpose, owner, data inputs, outputs, and update history"
+    requiredForTiers: ["T1", "T2", "T3"]
+
+  AcceptableUsagePolicy:
+    id: "AcceptableUsagePolicy"
+    name: "Acceptable Usage Policy"
+    category: "Policy"
+    description: "Documented guidelines for appropriate use of the AI system"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Clear policy document covering permitted uses, prohibited uses, and escalation procedures"
+    requiredForTiers: ["T2", "T3"]
+
+  ApprovalsMemo:
+    id: "ApprovalsMemo"
+    name: "Approvals Memo"
+    category: "Policy"
+    description: "Documented approval from governance committee or designated approvers"
+    ownerRole: "Model Risk"
+    whatGoodLooksLike: "Signed memo with approver names, dates, conditions, and any ongoing requirements"
+    requiredForTiers: ["T3"]
+
+  HumanOversightJustification:
+    id: "HumanOversightJustification"
+    name: "Human Oversight Justification"
+    category: "Policy"
+    description: "Documented justification for limited or no human-in-the-loop"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Analysis of why human oversight is not required, with compensating controls documented"
+    requiredForTiers: ["T3"]
+
+  # ============================================
+  # VALIDATION & TESTING
+  # ============================================
+
+  ValidationPlan:
+    id: "ValidationPlan"
+    name: "Validation Plan"
+    category: "Validation"
+    description: "Comprehensive plan for model validation activities"
+    ownerRole: "Model Validation"
+    whatGoodLooksLike: "Detailed plan covering scope, methodology, success criteria, and timeline"
+    requiredForTiers: ["T3"]
+
+  ModelCard:
+    id: "ModelCard"
+    name: "Model Card"
+    category: "Validation"
+    description: "Standardized documentation of model details, performance, and limitations"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Complete model card following industry standards with performance metrics, limitations, and intended use"
+    requiredForTiers: ["T2", "T3"]
+
+  FairnessAssessment:
+    id: "FairnessAssessment"
+    name: "Fairness Assessment"
+    category: "Validation"
+    description: "Assessment of model fairness across protected classes"
+    ownerRole: "Model Validation"
+    whatGoodLooksLike: "Statistical analysis of outcomes across demographic groups with documented findings"
+    requiredForTiers: ["T3"]
+
+  BiasTestingResults:
+    id: "BiasTestingResults"
+    name: "Bias Testing Results"
+    category: "Validation"
+    description: "Results of bias testing across sensitive attributes"
+    ownerRole: "Model Validation"
+    whatGoodLooksLike: "Documented test results showing performance metrics disaggregated by sensitive attributes"
+    requiredForTiers: ["T2", "T3"]
+
+  FairLendingAnalysis:
+    id: "FairLendingAnalysis"
+    name: "Fair Lending Analysis"
+    category: "Validation"
+    description: "Analysis of model impact on fair lending compliance"
+    ownerRole: "Compliance"
+    whatGoodLooksLike: "Comprehensive analysis including disparate impact testing and ECOA compliance review"
+    requiredForTiers: ["T3"]
+
+  ProxyVariableAnalysis:
+    id: "ProxyVariableAnalysis"
+    name: "Proxy Variable Analysis"
+    category: "Validation"
+    description: "Analysis of variables that may serve as proxies for protected characteristics"
+    ownerRole: "Model Validation"
+    whatGoodLooksLike: "Statistical analysis identifying potential proxy variables with mitigation strategies"
+    requiredForTiers: ["T2", "T3"]
+
+  ModelRiskAssessment:
+    id: "ModelRiskAssessment"
+    name: "Model Risk Assessment"
+    category: "Validation"
+    description: "Comprehensive assessment of model risk factors"
+    ownerRole: "Model Risk"
+    whatGoodLooksLike: "Risk assessment covering model complexity, data quality, use context, and materiality"
+    requiredForTiers: ["T3"]
+
+  SR11-7Compliance:
+    id: "SR11-7Compliance"
+    name: "SR 11-7 Compliance Review"
+    category: "Validation"
+    description: "Documentation of compliance with SR 11-7 model risk management guidance"
+    ownerRole: "Model Risk"
+    whatGoodLooksLike: "Checklist or memo demonstrating compliance with all applicable SR 11-7 requirements"
+    requiredForTiers: ["T3"]
+
+  # ============================================
+  # GENAI SPECIFIC
+  # ============================================
+
+  LLMEvalSuite:
+    id: "LLMEvalSuite"
+    name: "LLM Evaluation Suite"
+    category: "GenAI"
+    description: "Comprehensive evaluation results for LLM-based applications"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Documented evaluation results covering accuracy, hallucination rate, bias, and safety"
+    requiredForTiers: ["T3"]
+
+  GuardrailsDesign:
+    id: "GuardrailsDesign"
+    name: "Guardrails Design Document"
+    category: "GenAI"
+    description: "Design document for LLM guardrails and safety measures"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Technical design document specifying input/output filters, content policies, and fallback behaviors"
+    requiredForTiers: ["T3"]
+
+  HallucinationTestResults:
+    id: "HallucinationTestResults"
+    name: "Hallucination Testing Results"
+    category: "GenAI"
+    description: "Results of testing for LLM hallucinations and factual accuracy"
+    ownerRole: "Model Validation"
+    whatGoodLooksLike: "Test results with hallucination rate metrics, example failures, and mitigation measures"
+    requiredForTiers: ["T3"]
+
+  PromptInjectionTests:
+    id: "PromptInjectionTests"
+    name: "Prompt Injection Testing"
+    category: "GenAI"
+    description: "Security testing results for prompt injection vulnerabilities"
+    ownerRole: "Security"
+    whatGoodLooksLike: "Penetration testing results covering jailbreak attempts, prompt injection, and data extraction"
+    requiredForTiers: ["T3"]
+
+  ContentFilteringPlan:
+    id: "ContentFilteringPlan"
+    name: "Content Filtering Plan"
+    category: "GenAI"
+    description: "Plan for filtering inappropriate or harmful content"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Documentation of content filtering rules, blocked topics, and moderation approach"
+    requiredForTiers: ["T3"]
+
+  PromptGuidelines:
+    id: "PromptGuidelines"
+    name: "Prompt Guidelines"
+    category: "GenAI"
+    description: "Guidelines for effective and safe prompt engineering"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "User-facing guidelines covering prompt best practices and prohibited queries"
+    requiredForTiers: ["T2", "T3"]
+
+  OutputReviewProcess:
+    id: "OutputReviewProcess"
+    name: "Output Review Process"
+    category: "GenAI"
+    description: "Process for reviewing and validating AI-generated outputs"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Documented process for quality assurance of AI outputs before use"
+    requiredForTiers: ["T2", "T3"]
+
+  # ============================================
+  # MONITORING & OPERATIONS
+  # ============================================
+
+  MonitoringPlan:
+    id: "MonitoringPlan"
+    name: "Monitoring Plan"
+    category: "Monitoring"
+    description: "Plan for ongoing model performance monitoring"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Detailed plan specifying KPIs, thresholds, alert triggers, and escalation procedures"
+    requiredForTiers: ["T2", "T3"]
+
+  BasicMonitoringPlan:
+    id: "BasicMonitoringPlan"
+    name: "Basic Monitoring Plan"
+    category: "Monitoring"
+    description: "Basic monitoring for low-risk applications"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Simple monitoring approach with periodic review cadence documented"
+    requiredForTiers: ["T1"]
+
+  ChangeLog:
+    id: "ChangeLog"
+    name: "Change Log"
+    category: "Monitoring"
+    description: "Log of all changes to the model or application"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Version-controlled log with dates, descriptions, approvals, and impact assessments"
+    requiredForTiers: ["T2", "T3"]
+
+  FallbackProcedure:
+    id: "FallbackProcedure"
+    name: "Fallback Procedure"
+    category: "Monitoring"
+    description: "Documented procedure for handling model failures"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Step-by-step procedure for reverting to manual process or backup system"
+    requiredForTiers: ["T2", "T3"]
+
+  EscalationProcess:
+    id: "EscalationProcess"
+    name: "Escalation Process"
+    category: "Monitoring"
+    description: "Process for escalating model issues or concerns"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Clear escalation path with contacts, SLAs, and decision authority"
+    requiredForTiers: ["T3"]
+
+  BusinessContinuityPlan:
+    id: "BusinessContinuityPlan"
+    name: "Business Continuity Plan"
+    category: "Monitoring"
+    description: "Plan for maintaining operations if model becomes unavailable"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Documented alternative processes and recovery procedures"
+    requiredForTiers: ["T2", "T3"]
+
+  UsageGuidelines:
+    id: "UsageGuidelines"
+    name: "Usage Guidelines"
+    category: "Monitoring"
+    description: "Guidelines for appropriate use of model outputs"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Clear guidance on interpreting outputs, limitations, and when to seek human review"
+    requiredForTiers: ["T2", "T3"]
+
+  DisclaimerRequirements:
+    id: "DisclaimerRequirements"
+    name: "Disclaimer Requirements"
+    category: "Monitoring"
+    description: "Required disclaimers for model outputs"
+    ownerRole: "Compliance"
+    whatGoodLooksLike: "Documented disclaimer language and display requirements"
+    requiredForTiers: ["T2", "T3"]
+
+  # ============================================
+  # DATA & PRIVACY
+  # ============================================
+
+  DataPrivacyImpactAssessment:
+    id: "DataPrivacyImpactAssessment"
+    name: "Data Privacy Impact Assessment"
+    category: "DataPrivacy"
+    description: "Assessment of privacy implications of data use"
+    ownerRole: "Privacy"
+    whatGoodLooksLike: "Comprehensive DPIA covering data collection, use, retention, and subject rights"
+    requiredForTiers: ["T2", "T3"]
+
+  DataRetentionPolicy:
+    id: "DataRetentionPolicy"
+    name: "Data Retention Policy"
+    category: "DataPrivacy"
+    description: "Policy for retention and deletion of model data"
+    ownerRole: "Data Governance"
+    whatGoodLooksLike: "Clear policy specifying retention periods, deletion procedures, and legal holds"
+    requiredForTiers: ["T2", "T3"]
+
+  AccessControlMatrix:
+    id: "AccessControlMatrix"
+    name: "Access Control Matrix"
+    category: "DataPrivacy"
+    description: "Documentation of data access controls"
+    ownerRole: "Security"
+    whatGoodLooksLike: "Matrix showing roles, permissions, and data access levels"
+    requiredForTiers: ["T2", "T3"]
+
+  GLBAComplianceReview:
+    id: "GLBAComplianceReview"
+    name: "GLBA Compliance Review"
+    category: "DataPrivacy"
+    description: "Review of GLBA compliance for NPI handling"
+    ownerRole: "Compliance"
+    whatGoodLooksLike: "Documented review confirming compliance with GLBA safeguards"
+    requiredForTiers: ["T2", "T3"]
+
+  DataSharingAgreements:
+    id: "DataSharingAgreements"
+    name: "Data Sharing Agreements"
+    category: "DataPrivacy"
+    description: "Agreements governing data sharing with third parties"
+    ownerRole: "Legal"
+    whatGoodLooksLike: "Executed agreements with data protection terms and permitted uses"
+    requiredForTiers: ["T2", "T3"]
+
+  RulesDocumentation:
+    id: "RulesDocumentation"
+    name: "Rules Documentation"
+    category: "DataPrivacy"
+    description: "Documentation of business rules and logic"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Clear documentation of all rules, thresholds, and decision logic"
+    requiredForTiers: ["T1"]
+
+  # ============================================
+  # VENDOR & THIRD PARTY
+  # ============================================
+
+  VendorDueDiligence:
+    id: "VendorDueDiligence"
+    name: "Vendor Due Diligence"
+    category: "Vendor"
+    description: "Due diligence assessment of third-party vendor"
+    ownerRole: "Vendor Management"
+    whatGoodLooksLike: "Comprehensive vendor assessment covering security, stability, and model transparency"
+    requiredForTiers: ["T2", "T3"]
+
+  ContractReview:
+    id: "ContractReview"
+    name: "Contract Review"
+    category: "Vendor"
+    description: "Legal review of vendor contract terms"
+    ownerRole: "Legal"
+    whatGoodLooksLike: "Documented legal review with approved terms for data, IP, and liability"
+    requiredForTiers: ["T2", "T3"]
+
+  SLADocumentation:
+    id: "SLADocumentation"
+    name: "SLA Documentation"
+    category: "Vendor"
+    description: "Service level agreements with vendor"
+    ownerRole: "Vendor Management"
+    whatGoodLooksLike: "Documented SLAs covering availability, performance, and support requirements"
+    requiredForTiers: ["T2", "T3"]
+
+  VendorRiskAssessment:
+    id: "VendorRiskAssessment"
+    name: "Vendor Risk Assessment"
+    category: "Vendor"
+    description: "Risk assessment of vendor relationship"
+    ownerRole: "Vendor Management"
+    whatGoodLooksLike: "Risk assessment covering concentration, continuity, and data security risks"
+    requiredForTiers: ["T2", "T3"]
+
+  # ============================================
+  # REGULATORY SPECIFIC
+  # ============================================
+
+  BSAComplianceReview:
+    id: "BSAComplianceReview"
+    name: "BSA Compliance Review"
+    category: "Regulatory"
+    description: "Review of BSA/AML compliance requirements"
+    ownerRole: "Compliance"
+    whatGoodLooksLike: "Documented compliance review with regulatory mapping and gap analysis"
+    requiredForTiers: ["T3"]
+
+  SARFilingProcess:
+    id: "SARFilingProcess"
+    name: "SAR Filing Process"
+    category: "Regulatory"
+    description: "Process documentation for SAR filing workflow"
+    ownerRole: "Compliance"
+    whatGoodLooksLike: "Clear process documentation showing alert-to-SAR workflow"
+    requiredForTiers: ["T3"]
+
+  AlertTuningDocumentation:
+    id: "AlertTuningDocumentation"
+    name: "Alert Tuning Documentation"
+    category: "Regulatory"
+    description: "Documentation of alert threshold tuning and rationale"
+    ownerRole: "Model Owner"
+    whatGoodLooksLike: "Documented tuning decisions with supporting analysis and approval"
+    requiredForTiers: ["T3"]
+
+  ThresholdCalibration:
+    id: "ThresholdCalibration"
+    name: "Threshold Calibration"
+    category: "Regulatory"
+    description: "Documentation of model threshold calibration"
+    ownerRole: "Model Validation"
+    whatGoodLooksLike: "Statistical analysis supporting threshold selection with business rationale"
+    requiredForTiers: ["T3"]
+
+  AdverseActionProcess:
+    id: "AdverseActionProcess"
+    name: "Adverse Action Process"
+    category: "Regulatory"
+    description: "Process for adverse action notices"
+    ownerRole: "Compliance"
+    whatGoodLooksLike: "Documented process ensuring timely and compliant adverse action notices"
+    requiredForTiers: ["T3"]
+
+# Category display order and styling
+categories:
+  Policy:
+    order: 1
+    description: "Governance and policy documentation"
+  Validation:
+    order: 2
+    description: "Model validation and testing artifacts"
+  GenAI:
+    order: 3
+    description: "Generative AI specific requirements"
+  Monitoring:
+    order: 4
+    description: "Ongoing monitoring and operations"
+  DataPrivacy:
+    order: 5
+    description: "Data governance and privacy"
+  Vendor:
+    order: 6
+    description: "Third-party and vendor management"
+  Regulatory:
+    order: 7
+    description: "Regulatory compliance documentation"

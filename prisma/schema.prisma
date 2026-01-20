@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model UseCase {
+  id                      String       @id @default(uuid())
+  title                   String
+  businessLine            String
+  description             String
+  aiType                  String       // Traditional ML / GenAI / Rules / Hybrid
+  usageType               String       // Decisioning / Advisory / Automation
+  humanInLoop             String       // Required / Optional / None
+  customerImpact          String       // Direct / Indirect / None
+  regulatoryDomains       String       // JSON array stored as string
+  deployment              String       // Internal tool / Customer-facing / 3rd-party
+  vendorInvolved          Boolean      @default(false)
+  vendorName              String?
+  intendedUsers           String?
+  downstreamDecisions     String?
+
+  // Data Profile
+  containsPii             Boolean      @default(false)
+  containsNpi             Boolean      @default(false)
+  sensitiveAttributesUsed Boolean      @default(false)
+  trainingDataSource      String?      // Internal / Vendor / Public / Unknown / N/A
+  retentionPolicyDefined  Boolean      @default(false)
+  loggingRequired         Boolean      @default(false)
+  accessControlsDefined   Boolean      @default(false)
+
+  // Model Profile
+  modelDefinitionTrigger  Boolean      @default(false)
+  explainabilityRequired  Boolean      @default(false)
+  changeFrequency         String?      // Ad hoc / Quarterly / Monthly / Continuous
+  retraining              Boolean      @default(false)
+  overridesAllowed        Boolean      @default(false)
+  fallbackPlanDefined     Boolean      @default(false)
+
+  // Controls & Monitoring
+  monitoringCadence       String?      // Daily / Weekly / Monthly / Quarterly / None
+  humanReviewProcess      String?
+  incidentResponseContact String?
+
+  // Status & Metadata
+  status                  String       @default("Draft") // Draft / Submitted / Under Review / Approved / Rejected
+  createdBy               String       @default("demo-user")
+  createdAt               DateTime     @default(now())
+  updatedAt               DateTime     @updatedAt
+
+  // Relations
+  decision                Decision?
+  attachments             Attachment[]
+  auditEvents             AuditEvent[]
+}
+
+model Decision {
+  id                 String   @id @default(uuid())
+  useCaseId          String   @unique
+  useCase            UseCase  @relation(fields: [useCaseId], references: [id], onDelete: Cascade)
+  isModel            String   // Yes / No / Model-like
+  tier               String   // T1 / T2 / T3
+  triggeredRules     String   // JSON array stored as string
+  rationaleSummary   String
+  requiredArtifacts  String   // JSON array stored as string
+  missingEvidence    String   // JSON array stored as string
+  riskFlags          String   // JSON array stored as string
+  generatedDocuments String?  // JSON array of paths
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Attachment {
+  id          String   @id @default(uuid())
+  useCaseId   String
+  useCase     UseCase  @relation(fields: [useCaseId], references: [id], onDelete: Cascade)
+  filename    String
+  type        String   // Business one-pager / Architecture diagram / Vendor doc / Data dictionary
+  storagePath String
+  fileSize    Int?
+  mimeType    String?
+  createdAt   DateTime @default(now())
+}
+
+model AuditEvent {
+  id          String   @id @default(uuid())
+  useCaseId   String
+  useCase     UseCase  @relation(fields: [useCaseId], references: [id], onDelete: Cascade)
+  actor       String
+  eventType   String   // Created / Updated / Submitted / DecisionGenerated / Exported / AttachmentUploaded
+  details     String?  // JSON details
+  diffSummary String?
+  timestamp   DateTime @default(now())
+}

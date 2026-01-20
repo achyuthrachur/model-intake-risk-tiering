@@ -1,0 +1,373 @@
+# Model Intake Risk Tiering Rules Configuration
+# This file defines the deterministic rules for risk tier assignment
+
+tiers:
+  T3:
+    name: "High Risk"
+    description: "High materiality / regulated / customer impact - requires full validation"
+    color: "red"
+    severity: 3
+  T2:
+    name: "Medium Risk"
+    description: "Moderate impact / advisory - requires enhanced monitoring"
+    color: "amber"
+    severity: 2
+  T1:
+    name: "Low Risk"
+    description: "Low impact / internal productivity - standard controls"
+    color: "green"
+    severity: 1
+
+defaultTier: "T1"
+
+rules:
+  # ============================================
+  # TIER 3 (HIGH RISK) TRIGGERS
+  # ============================================
+
+  - id: "R_DECISIONING_CUSTOMER_IMPACT"
+    name: "Automated Decisioning with Customer Impact"
+    description: "Automated decisioning that directly or indirectly affects customers"
+    tier: "T3"
+    conditions:
+      all:
+        - field: "usageType"
+          operator: "eq"
+          value: "Decisioning"
+        - field: "customerImpact"
+          operator: "in"
+          value: ["Direct", "Indirect"]
+    effects:
+      addRequiredArtifacts:
+        - "ValidationPlan"
+        - "MonitoringPlan"
+        - "ModelCard"
+        - "ChangeLog"
+        - "ApprovalsMemo"
+        - "FairnessAssessment"
+      addRiskFlags:
+        - "Materiality"
+        - "CustomerImpact"
+      triggeredCriteria: "Automated decisioning with customer impact requires T3 review"
+
+  - id: "R_NO_HITL_DECISIONING"
+    name: "No Human-in-the-Loop for Decisioning"
+    description: "Automated decisions without required human oversight"
+    tier: "T3"
+    conditions:
+      all:
+        - field: "usageType"
+          operator: "eq"
+          value: "Decisioning"
+        - field: "humanInLoop"
+          operator: "eq"
+          value: "None"
+    effects:
+      addRequiredArtifacts:
+        - "HumanOversightJustification"
+        - "FallbackProcedure"
+        - "EscalationProcess"
+      addRiskFlags:
+        - "NoHumanOversight"
+        - "AutomatedDecisions"
+      triggeredCriteria: "No human-in-the-loop for decisioning use case"
+
+  - id: "R_GENAI_CUSTOMER_FACING"
+    name: "GenAI Customer Facing"
+    description: "Generative AI used in customer-facing applications"
+    tier: "T3"
+    conditions:
+      all:
+        - field: "aiType"
+          operator: "in"
+          value: ["GenAI", "Hybrid"]
+        - field: "deployment"
+          operator: "eq"
+          value: "Customer-facing"
+    effects:
+      addRequiredArtifacts:
+        - "LLMEvalSuite"
+        - "GuardrailsDesign"
+        - "HallucinationTestResults"
+        - "PromptInjectionTests"
+        - "ContentFilteringPlan"
+      addRiskFlags:
+        - "GenAIRisk"
+        - "HallucinationRisk"
+        - "CustomerExposure"
+      triggeredCriteria: "Customer-facing GenAI application requires extensive safeguards"
+
+  - id: "R_LENDING_CREDIT"
+    name: "Lending or Credit Decisions"
+    description: "Models used for lending, credit, or underwriting decisions"
+    tier: "T3"
+    conditions:
+      any:
+        - field: "businessLine"
+          operator: "in"
+          value: ["Credit", "Lending", "Underwriting", "Retail Banking"]
+        - field: "regulatoryDomains"
+          operator: "contains"
+          value: "Lending"
+    effects:
+      addRequiredArtifacts:
+        - "FairLendingAnalysis"
+        - "AdverseActionProcess"
+        - "ModelRiskAssessment"
+        - "SR11-7Compliance"
+      addRiskFlags:
+        - "RegulatoryCompliance"
+        - "FairLending"
+        - "ECOA"
+      triggeredCriteria: "Lending/credit decisions subject to fair lending regulations"
+
+  - id: "R_AML_BSA"
+    name: "AML/BSA Critical"
+    description: "Models supporting AML or BSA compliance"
+    tier: "T3"
+    conditions:
+      any:
+        - field: "businessLine"
+          operator: "eq"
+          value: "AML"
+        - field: "regulatoryDomains"
+          operator: "contains"
+          value: "AML"
+    effects:
+      addRequiredArtifacts:
+        - "BSAComplianceReview"
+        - "SARFilingProcess"
+        - "AlertTuningDocumentation"
+        - "ThresholdCalibration"
+      addRiskFlags:
+        - "BSACompliance"
+        - "RegulatoryExamRisk"
+      triggeredCriteria: "AML/BSA applications are exam-critical"
+
+  # ============================================
+  # TIER 2 (MEDIUM RISK) TRIGGERS
+  # ============================================
+
+  - id: "R_ADVISORY_REGULATED"
+    name: "Advisory with Regulatory Domain"
+    description: "Advisory use cases touching regulated domains"
+    tier: "T2"
+    conditions:
+      all:
+        - field: "usageType"
+          operator: "eq"
+          value: "Advisory"
+        - field: "regulatoryDomains"
+          operator: "notEmpty"
+    effects:
+      addRequiredArtifacts:
+        - "MonitoringPlan"
+        - "UsageGuidelines"
+        - "DisclaimerRequirements"
+      addRiskFlags:
+        - "RegulatoryAdjacent"
+      triggeredCriteria: "Advisory use case in regulated domain requires monitoring"
+
+  - id: "R_PII_PROCESSING"
+    name: "PII Processing"
+    description: "Use case processes personally identifiable information"
+    tier: "T2"
+    conditions:
+      field: "containsPii"
+      operator: "eq"
+      value: true
+    effects:
+      addRequiredArtifacts:
+        - "DataPrivacyImpactAssessment"
+        - "DataRetentionPolicy"
+        - "AccessControlMatrix"
+      addRiskFlags:
+        - "PIIHandling"
+        - "PrivacyRisk"
+      triggeredCriteria: "PII processing requires privacy impact assessment"
+
+  - id: "R_NPI_PROCESSING"
+    name: "NPI Processing"
+    description: "Use case processes non-public personal information"
+    tier: "T2"
+    conditions:
+      field: "containsNpi"
+      operator: "eq"
+      value: true
+    effects:
+      addRequiredArtifacts:
+        - "DataPrivacyImpactAssessment"
+        - "GLBAComplianceReview"
+        - "DataSharingAgreements"
+      addRiskFlags:
+        - "NPIHandling"
+        - "GLBACompliance"
+      triggeredCriteria: "NPI processing subject to GLBA requirements"
+
+  - id: "R_SENSITIVE_ATTRIBUTES"
+    name: "Sensitive Attributes Used"
+    description: "Model uses sensitive demographic or protected attributes"
+    tier: "T2"
+    conditions:
+      field: "sensitiveAttributesUsed"
+      operator: "eq"
+      value: true
+    effects:
+      addRequiredArtifacts:
+        - "FairnessAssessment"
+        - "BiasTestingResults"
+        - "ProxyVariableAnalysis"
+      addRiskFlags:
+        - "FairnessRisk"
+        - "ProtectedAttributes"
+      triggeredCriteria: "Use of sensitive attributes requires fairness assessment"
+
+  - id: "R_VENDOR_MODEL"
+    name: "Vendor Model"
+    description: "Third-party or vendor-provided model"
+    tier: "T2"
+    conditions:
+      field: "vendorInvolved"
+      operator: "eq"
+      value: true
+    effects:
+      addRequiredArtifacts:
+        - "VendorDueDiligence"
+        - "ContractReview"
+        - "SLADocumentation"
+        - "VendorRiskAssessment"
+      addRiskFlags:
+        - "ThirdPartyRisk"
+        - "VendorDependency"
+      triggeredCriteria: "Vendor-provided models require due diligence review"
+
+  - id: "R_GENAI_INTERNAL"
+    name: "GenAI Internal Use"
+    description: "Generative AI for internal tools"
+    tier: "T2"
+    conditions:
+      all:
+        - field: "aiType"
+          operator: "in"
+          value: ["GenAI", "Hybrid"]
+        - field: "deployment"
+          operator: "eq"
+          value: "Internal tool"
+    effects:
+      addRequiredArtifacts:
+        - "AcceptableUsagePolicy"
+        - "PromptGuidelines"
+        - "OutputReviewProcess"
+      addRiskFlags:
+        - "GenAIRisk"
+        - "ContentGeneration"
+      triggeredCriteria: "Internal GenAI tools require usage policies"
+
+  - id: "R_NO_FALLBACK"
+    name: "No Fallback Plan"
+    description: "No defined fallback if model fails"
+    tier: "T2"
+    conditions:
+      all:
+        - field: "fallbackPlanDefined"
+          operator: "eq"
+          value: false
+        - field: "usageType"
+          operator: "in"
+          value: ["Decisioning", "Advisory"]
+    effects:
+      addRequiredArtifacts:
+        - "FallbackProcedure"
+        - "BusinessContinuityPlan"
+      addRiskFlags:
+        - "OperationalRisk"
+        - "NoFallback"
+      triggeredCriteria: "No fallback plan for decision/advisory use case"
+
+  # ============================================
+  # TIER 1 (LOW RISK) TRIGGERS
+  # ============================================
+
+  - id: "R_INTERNAL_AUTOMATION"
+    name: "Internal Automation"
+    description: "Internal productivity automation with no customer impact"
+    tier: "T1"
+    conditions:
+      all:
+        - field: "usageType"
+          operator: "eq"
+          value: "Automation"
+        - field: "customerImpact"
+          operator: "eq"
+          value: "None"
+        - field: "deployment"
+          operator: "eq"
+          value: "Internal tool"
+    effects:
+      addRequiredArtifacts:
+        - "UseCaseInventoryEntry"
+        - "BasicMonitoringPlan"
+      addRiskFlags: []
+      triggeredCriteria: "Internal automation with no customer impact"
+
+  - id: "R_RULES_ONLY"
+    name: "Rules-Based System"
+    description: "Non-ML rules-based system"
+    tier: "T1"
+    conditions:
+      all:
+        - field: "aiType"
+          operator: "eq"
+          value: "Rules"
+        - field: "modelDefinitionTrigger"
+          operator: "eq"
+          value: false
+    effects:
+      addRequiredArtifacts:
+        - "UseCaseInventoryEntry"
+        - "RulesDocumentation"
+      addRiskFlags: []
+      triggeredCriteria: "Rules-based system without model characteristics"
+
+# Model Definition Criteria
+# Determines if something is considered a "model" under MRM policy
+modelDefinitionCriteria:
+  - id: "MD_INFLUENCES_DECISIONS"
+    name: "Influences Decisions"
+    description: "Output directly influences business decisions"
+    conditions:
+      field: "modelDefinitionTrigger"
+      operator: "eq"
+      value: true
+    result: "Model"
+
+  - id: "MD_QUANTITATIVE_METHOD"
+    name: "Quantitative Method"
+    description: "Uses statistical, mathematical, or ML methods"
+    conditions:
+      field: "aiType"
+      operator: "in"
+      value: ["Traditional ML", "GenAI", "Hybrid"]
+    result: "Model"
+
+  - id: "MD_DECISIONING"
+    name: "Decisioning Use"
+    description: "Used for automated decisioning"
+    conditions:
+      field: "usageType"
+      operator: "eq"
+      value: "Decisioning"
+    result: "Model"
+
+  - id: "MD_SCORING"
+    name: "Produces Scores"
+    description: "Produces scores, rankings, or classifications"
+    conditions:
+      all:
+        - field: "usageType"
+          operator: "in"
+          value: ["Decisioning", "Advisory"]
+        - field: "aiType"
+          operator: "neq"
+          value: "Rules"
+    result: "Model"
