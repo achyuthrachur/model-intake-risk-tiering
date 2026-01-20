@@ -197,11 +197,11 @@ export default function UseCaseDetailPage() {
   if (!useCase) return null;
 
   const decision = useCase.decision;
-  const triggeredRules = decision ? parseJsonSafe(decision.triggeredRules, []) : [];
-  const requiredArtifacts = decision ? parseJsonSafe(decision.requiredArtifacts, []) : [];
-  const missingEvidence = decision ? parseJsonSafe(decision.missingEvidence, []) : [];
-  const riskFlags = decision ? parseJsonSafe(decision.riskFlags, []) : [];
-  const regulatoryDomains = parseJsonSafe(useCase.regulatoryDomains, []);
+  const triggeredRules = decision ? parseJsonSafe<string[]>(decision.triggeredRules, []) : [];
+  const requiredArtifacts = decision ? parseJsonSafe<string[]>(decision.requiredArtifacts, []) : [];
+  const missingEvidence = decision ? parseJsonSafe<string[]>(decision.missingEvidence, []) : [];
+  const riskFlags = decision ? parseJsonSafe<string[]>(decision.riskFlags, []) : [];
+  const regulatoryDomains = parseJsonSafe<string[]>(useCase.regulatoryDomains, []);
 
   // Group artifacts by category
   const groupedArtifacts: Record<string, any[]> = {};
