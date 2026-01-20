@@ -17,6 +17,10 @@ import {
   ClipboardList,
   History,
   FileDown,
+  Brain,
+  Lightbulb,
+  Eye,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -47,6 +51,8 @@ export default function UseCaseDetailPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [artifactsConfig, setArtifactsConfig] = useState<any>(null);
+  const [aiInsights, setAiInsights] = useState<any>(null);
+  const [generatingAI, setGeneratingAI] = useState(false);
 
   const id = params.id as string;
 
@@ -54,6 +60,54 @@ export default function UseCaseDetailPage() {
     fetchUseCase();
     fetchConfig();
   }, [id]);
+
+  // Fetch existing AI insights when use case loads
+  useEffect(() => {
+    if (useCase?.decision) {
+      fetchAIInsights();
+    }
+  }, [useCase?.decision?.id]);
+
+  const fetchAIInsights = async () => {
+    try {
+      const response = await fetch(`/api/ai/risk-assessment?useCaseId=${id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAiInsights(data);
+      }
+    } catch (error) {
+      // AI insights are optional, don't show error
+      console.log('No AI insights available');
+    }
+  };
+
+  const generateAIInsights = async () => {
+    try {
+      setGeneratingAI(true);
+      const response = await fetch('/api/ai/risk-assessment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ useCaseId: id }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate AI insights');
+      }
+
+      const data = await response.json();
+      setAiInsights(data);
+      toast({ title: 'AI Insights Generated', description: 'Enhanced risk assessment is ready' });
+    } catch (error) {
+      toast({
+        title: 'AI Insights Unavailable',
+        description: error instanceof Error ? error.message : 'Set OPENAI_API_KEY to enable AI features',
+        variant: 'destructive',
+      });
+    } finally {
+      setGeneratingAI(false);
+    }
+  };
 
   const fetchUseCase = async () => {
     try {
@@ -454,6 +508,129 @@ export default function UseCaseDetailPage() {
                         {decision.rationaleSummary}
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
+
+                {/* AI Insights Section */}
+                <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center text-purple-800">
+                        <Brain className="w-5 h-5 mr-2" />
+                        AI-Enhanced Risk Insights
+                      </CardTitle>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={generateAIInsights}
+                        disabled={generatingAI}
+                        className="border-purple-300 text-purple-700 hover:bg-purple-100"
+                      >
+                        {generatingAI ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Analyzing...
+                          </>
+                        ) : aiInsights ? (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Regenerate
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Generate AI Insights
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    <CardDescription>
+                      AI-powered analysis of risks, blind spots, and mitigation recommendations
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {!aiInsights ? (
+                      <div className="text-center py-8">
+                        <Brain className="w-12 h-12 text-purple-300 mx-auto mb-4" />
+                        <p className="text-gray-600 mb-2">
+                          Click "Generate AI Insights" to get enhanced risk analysis
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Requires OpenAI API key to be configured
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {/* Executive Summary */}
+                        {aiInsights.executiveSummary && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-purple-800 mb-2 flex items-center">
+                              <FileText className="w-4 h-4 mr-2" />
+                              Executive Summary
+                            </h4>
+                            <p className="text-gray-700 bg-white p-4 rounded-lg border border-purple-100">
+                              {aiInsights.executiveSummary}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Enhanced Rationale */}
+                        {aiInsights.enhancedRationale && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-purple-800 mb-2 flex items-center">
+                              <Eye className="w-4 h-4 mr-2" />
+                              Enhanced Analysis
+                            </h4>
+                            <div className="text-gray-700 bg-white p-4 rounded-lg border border-purple-100 whitespace-pre-wrap">
+                              {aiInsights.enhancedRationale}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Mitigation Recommendations */}
+                        {aiInsights.mitigationRecommendations && aiInsights.mitigationRecommendations.length > 0 && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-purple-800 mb-2 flex items-center">
+                              <Lightbulb className="w-4 h-4 mr-2" />
+                              Mitigation Recommendations
+                            </h4>
+                            <ul className="space-y-2">
+                              {aiInsights.mitigationRecommendations.map((rec: string, i: number) => (
+                                <li key={i} className="flex items-start bg-white p-3 rounded-lg border border-purple-100">
+                                  <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                                  <span className="text-gray-700">{rec}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Blind Spots */}
+                        {aiInsights.blindSpots && aiInsights.blindSpots.length > 0 && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-purple-800 mb-2 flex items-center">
+                              <AlertTriangle className="w-4 h-4 mr-2" />
+                              Potential Blind Spots
+                            </h4>
+                            <ul className="space-y-2">
+                              {aiInsights.blindSpots.map((spot: string, i: number) => (
+                                <li key={i} className="flex items-start bg-amber-50 p-3 rounded-lg border border-amber-200">
+                                  <Eye className="w-4 h-4 text-amber-600 mr-2 mt-0.5 flex-shrink-0" />
+                                  <span className="text-gray-700">{spot}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Confidence Notes */}
+                        {aiInsights.confidenceNotes && (
+                          <div className="text-xs text-gray-500 italic border-t border-purple-100 pt-4">
+                            Note: {aiInsights.confidenceNotes}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 

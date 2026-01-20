@@ -15,6 +15,7 @@ import {
   CheckCircle,
   Settings,
   RefreshCw,
+  MessageSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -119,6 +120,12 @@ export default function Dashboard() {
                 <Button variant="outline" size="sm">
                   <Settings className="w-4 h-4 mr-2" />
                   Admin
+                </Button>
+              </Link>
+              <Link href="/intake/chat">
+                <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  AI Chat Intake
                 </Button>
               </Link>
               <Link href="/intake/new">
@@ -294,6 +301,12 @@ export default function Dashboard() {
                   <Button variant="outline" onClick={seedDemoData}>
                     Load Demo Data
                   </Button>
+                  <Link href="/intake/chat">
+                    <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      AI Chat Intake
+                    </Button>
+                  </Link>
                   <Link href="/intake/new">
                     <Button>
                       <Plus className="w-4 h-4 mr-2" />
