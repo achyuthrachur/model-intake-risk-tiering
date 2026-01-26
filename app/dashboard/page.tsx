@@ -16,6 +16,7 @@ import {
   Settings,
   RefreshCw,
   MessageSquare,
+  Lightbulb,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +31,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDate, getTierBadgeColor, getStatusColor, truncate } from '@/lib/utils';
+import { HelpTooltip, HelpCard } from '@/components/ui/help-tooltip';
 import type { UseCaseWithRelations } from '@/lib/types';
 
 interface DashboardStats {
@@ -147,12 +149,33 @@ export default function Dashboard() {
       </header>
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Dashboard Help Card */}
+        <HelpCard
+          id="dashboard-intro"
+          title="Dashboard Overview"
+          icon={<Lightbulb className="w-5 h-5" />}
+          variant="info"
+          className="mb-6"
+          content={
+            <div className="space-y-2">
+              <p>This dashboard shows all AI/ML use cases in the governance pipeline.</p>
+              <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
+                <li><strong>Stats cards</strong> show counts by status and risk tier</li>
+                <li><strong>Filters</strong> let you narrow down by status or tier</li>
+                <li><strong>Click any row</strong> to view details and take action</li>
+              </ul>
+              <p className="text-xs mt-2">Use "Load Demo Data" to populate sample use cases for testing.</p>
+            </div>
+          }
+        />
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+              <CardTitle className="text-sm font-medium text-gray-500 inline-flex items-center gap-1">
                 Total Use Cases
+                <HelpTooltip content="All use cases in the system regardless of status" />
               </CardTitle>
               <FileText className="w-4 h-4 text-gray-400" />
             </CardHeader>
@@ -167,8 +190,9 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+              <CardTitle className="text-sm font-medium text-gray-500 inline-flex items-center gap-1">
                 Draft
+                <HelpTooltip content="Use cases that are being prepared but have not yet been submitted for review" />
               </CardTitle>
               <Clock className="w-4 h-4 text-gray-400" />
             </CardHeader>
@@ -183,8 +207,9 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+              <CardTitle className="text-sm font-medium text-gray-500 inline-flex items-center gap-1">
                 Submitted
+                <HelpTooltip content="Use cases that have been submitted and are awaiting MRM review" />
               </CardTitle>
               <FileText className="w-4 h-4 text-blue-400" />
             </CardHeader>
@@ -199,8 +224,9 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+              <CardTitle className="text-sm font-medium text-gray-500 inline-flex items-center gap-1">
                 Approved
+                <HelpTooltip content="Use cases that have completed review and received approval to proceed" />
               </CardTitle>
               <CheckCircle className="w-4 h-4 text-green-400" />
             </CardHeader>
@@ -215,8 +241,12 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+              <CardTitle className="text-sm font-medium text-gray-500 inline-flex items-center gap-1">
                 High Tier (T3)
+                <HelpTooltip
+                  title="High Risk Use Cases"
+                  content="T3 use cases require the most rigorous governance: full validation, senior approval, enhanced monitoring, and comprehensive documentation. These typically involve customer-facing decisions, regulated activities, or significant financial impact."
+                />
               </CardTitle>
               <AlertTriangle className="w-4 h-4 text-red-400" />
             </CardHeader>
@@ -239,39 +269,71 @@ export default function Dashboard() {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
-                  placeholder="Search use cases..."
+                  placeholder="Search by title, business line, or description..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
-              <div className="flex gap-3">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-40">
-                    <Filter className="w-4 h-4 mr-2" />
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="Draft">Draft</SelectItem>
-                    <SelectItem value="Submitted">Submitted</SelectItem>
-                    <SelectItem value="Under Review">Under Review</SelectItem>
-                    <SelectItem value="Approved">Approved</SelectItem>
-                    <SelectItem value="Rejected">Rejected</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="flex gap-3 items-center">
+                <div className="flex items-center gap-1">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-40">
+                      <Filter className="w-4 h-4 mr-2" />
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="Draft">Draft</SelectItem>
+                      <SelectItem value="Submitted">Submitted</SelectItem>
+                      <SelectItem value="Under Review">Under Review</SelectItem>
+                      <SelectItem value="Approved">Approved</SelectItem>
+                      <SelectItem value="Sent Back">Sent Back</SelectItem>
+                      <SelectItem value="Rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <HelpTooltip
+                    title="Status Filter"
+                    content={
+                      <div>
+                        <ul className="space-y-1">
+                          <li><strong>Draft:</strong> Not yet submitted</li>
+                          <li><strong>Submitted:</strong> Awaiting review</li>
+                          <li><strong>Under Review:</strong> Being evaluated</li>
+                          <li><strong>Sent Back:</strong> Needs revision</li>
+                          <li><strong>Approved:</strong> Cleared for use</li>
+                          <li><strong>Rejected:</strong> Not approved</li>
+                        </ul>
+                      </div>
+                    }
+                  />
+                </div>
 
-                <Select value={tierFilter} onValueChange={setTierFilter}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Tier" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Tiers</SelectItem>
-                    <SelectItem value="T1">T1 - Low</SelectItem>
-                    <SelectItem value="T2">T2 - Medium</SelectItem>
-                    <SelectItem value="T3">T3 - High</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center gap-1">
+                  <Select value={tierFilter} onValueChange={setTierFilter}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Tier" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Tiers</SelectItem>
+                      <SelectItem value="T1">T1 - Low</SelectItem>
+                      <SelectItem value="T2">T2 - Medium</SelectItem>
+                      <SelectItem value="T3">T3 - High</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <HelpTooltip
+                    title="Risk Tier Filter"
+                    content={
+                      <div>
+                        <ul className="space-y-1">
+                          <li><strong>T1 (Low):</strong> Internal tools, minimal risk</li>
+                          <li><strong>T2 (Medium):</strong> Advisory, moderate oversight</li>
+                          <li><strong>T3 (High):</strong> Decisions, regulated, customer-facing</li>
+                        </ul>
+                      </div>
+                    }
+                  />
+                </div>
               </div>
             </div>
           </CardContent>

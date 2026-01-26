@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/accordion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
+import { HelpTooltip, HelpCard } from '@/components/ui/help-tooltip';
 import {
   formatDate,
   formatDateTime,
@@ -425,16 +426,74 @@ export default function UseCaseDetailPage() {
                         <span className="text-sm text-gray-500">Triggered Rules</span>
                         <span className="text-sm font-medium">{triggeredRules.length}</span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500">Required Artifacts</span>
-                        <span className="text-sm font-medium">{requiredArtifacts.length}</span>
-                      </div>
-                      {missingEvidence.length > 0 && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-500">Missing Evidence</span>
-                          <span className="text-sm font-medium text-amber-600">{missingEvidence.length}</span>
+
+                      {/* Artifacts Summary with expandable list */}
+                      <div className="border-t pt-3 mt-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700">Required Artifacts</span>
+                          <Badge variant="outline">{requiredArtifacts.length}</Badge>
                         </div>
-                      )}
+
+                        {/* Show artifact names grouped by status */}
+                        {artifactsConfig && requiredArtifacts.length > 0 && (
+                          <div className="space-y-2">
+                            {/* Missing artifacts first (highlighted) */}
+                            {missingEvidence.length > 0 && (
+                              <div className="bg-amber-50 rounded-md p-2">
+                                <div className="flex items-center gap-1.5 text-amber-700 text-xs font-medium mb-1.5">
+                                  <AlertCircle className="w-3 h-3" />
+                                  Missing ({missingEvidence.length})
+                                </div>
+                                <ul className="space-y-0.5">
+                                  {missingEvidence.slice(0, 5).map((id: string) => {
+                                    const artifact = artifactsConfig.artifacts[id];
+                                    return (
+                                      <li key={id} className="text-xs text-amber-800 flex items-start">
+                                        <span className="mr-1">•</span>
+                                        <span>{artifact?.name || id}</span>
+                                      </li>
+                                    );
+                                  })}
+                                  {missingEvidence.length > 5 && (
+                                    <li className="text-xs text-amber-600 italic">
+                                      +{missingEvidence.length - 5} more...
+                                    </li>
+                                  )}
+                                </ul>
+                              </div>
+                            )}
+
+                            {/* Provided artifacts */}
+                            {requiredArtifacts.length > missingEvidence.length && (
+                              <div className="bg-green-50 rounded-md p-2">
+                                <div className="flex items-center gap-1.5 text-green-700 text-xs font-medium mb-1.5">
+                                  <CheckCircle className="w-3 h-3" />
+                                  Provided ({requiredArtifacts.length - missingEvidence.length})
+                                </div>
+                                <ul className="space-y-0.5">
+                                  {requiredArtifacts
+                                    .filter((id: string) => !missingEvidence.includes(id))
+                                    .slice(0, 5)
+                                    .map((id: string) => {
+                                      const artifact = artifactsConfig.artifacts[id];
+                                      return (
+                                        <li key={id} className="text-xs text-green-800 flex items-start">
+                                          <span className="mr-1">•</span>
+                                          <span>{artifact?.name || id}</span>
+                                        </li>
+                                      );
+                                    })}
+                                  {requiredArtifacts.length - missingEvidence.length > 5 && (
+                                    <li className="text-xs text-green-600 italic">
+                                      +{requiredArtifacts.length - missingEvidence.length - 5} more...
+                                    </li>
+                                  )}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 )}
@@ -494,9 +553,56 @@ export default function UseCaseDetailPage() {
                           <Badge className={`ml-3 ${getTierBadgeColor(decision.tier)}`}>
                             {decision.tier === 'T1' ? 'Low Risk' : decision.tier === 'T2' ? 'Medium Risk' : 'High Risk'}
                           </Badge>
+                          <HelpTooltip
+                            className="ml-2"
+                            title={`Tier ${decision.tier} - ${decision.tier === 'T1' ? 'Low' : decision.tier === 'T2' ? 'Medium' : 'High'} Risk`}
+                            content={
+                              decision.tier === 'T1' ? (
+                                <div>
+                                  <p className="mb-2">T1 (Low Risk) use cases typically:</p>
+                                  <ul className="list-disc list-inside space-y-1">
+                                    <li>Are internal productivity tools</li>
+                                    <li>Have no direct customer impact</li>
+                                    <li>Use rules-based or simple automation</li>
+                                    <li>Require basic monitoring only</li>
+                                  </ul>
+                                </div>
+                              ) : decision.tier === 'T2' ? (
+                                <div>
+                                  <p className="mb-2">T2 (Medium Risk) use cases typically:</p>
+                                  <ul className="list-disc list-inside space-y-1">
+                                    <li>Provide advisory recommendations</li>
+                                    <li>Have indirect customer impact</li>
+                                    <li>Require human oversight before action</li>
+                                    <li>Need model cards and monitoring plans</li>
+                                  </ul>
+                                </div>
+                              ) : (
+                                <div>
+                                  <p className="mb-2">T3 (High Risk) use cases typically:</p>
+                                  <ul className="list-disc list-inside space-y-1">
+                                    <li>Make automated decisions</li>
+                                    <li>Directly impact customers</li>
+                                    <li>Fall under regulatory requirements</li>
+                                    <li>Require full validation, fairness testing, and governance approval</li>
+                                  </ul>
+                                </div>
+                              )
+                            }
+                          />
                         </CardTitle>
-                        <CardDescription className="mt-1">
+                        <CardDescription className="mt-1 inline-flex items-center gap-1">
                           Model Determination: {decision.isModel}
+                          <HelpTooltip
+                            title="Model Determination"
+                            content={
+                              <div>
+                                <p className="mb-2">Under SR 11-7 guidance, a "model" is defined as:</p>
+                                <p className="italic text-sm">"A quantitative method, system, or approach that applies statistical, economic, financial, or mathematical theories, techniques, and assumptions to process input data into quantitative estimates."</p>
+                                <p className="mt-2">This determination affects the level of governance oversight required.</p>
+                              </div>
+                            }
+                          />
                         </CardDescription>
                       </div>
                     </div>
@@ -641,15 +747,35 @@ export default function UseCaseDetailPage() {
                       <CardTitle className="flex items-center">
                         <AlertTriangle className="w-5 h-5 mr-2 text-amber-500" />
                         Risk Flags ({riskFlags.length})
+                        <HelpTooltip
+                          className="ml-2"
+                          title="What are Risk Flags?"
+                          content="Risk flags highlight specific characteristics of this use case that warrant attention. These may require additional controls, documentation, or review depending on the flag type."
+                        />
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-wrap gap-2">
-                        {riskFlags.map((flag: string) => (
-                          <Badge key={flag} variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                            {flag}
-                          </Badge>
-                        ))}
+                        {riskFlags.map((flag: string) => {
+                          const flagDescriptions: Record<string, string> = {
+                            'Materiality': 'This use case has material impact on business decisions or customer outcomes',
+                            'NoHumanOversight': 'No required human review of outputs - consider adding oversight controls',
+                            'CustomerImpact': 'Directly affects customers - enhanced testing and monitoring recommended',
+                            'GenAI': 'Uses generative AI - requires additional guardrails and hallucination testing',
+                            'SensitiveData': 'Processes sensitive data - ensure privacy controls are in place',
+                            'Regulated': 'Falls under regulatory requirements - ensure compliance documentation',
+                            'VendorModel': 'Third-party vendor involvement - requires vendor due diligence',
+                            'FairLending': 'May impact fair lending compliance - requires bias testing',
+                          };
+                          return (
+                            <div key={flag} className="inline-flex items-center gap-1">
+                              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                                {flag}
+                              </Badge>
+                              <HelpTooltip content={flagDescriptions[flag] || `This flag indicates: ${flag}`} />
+                            </div>
+                          );
+                        })}
                       </div>
                     </CardContent>
                   </Card>
@@ -658,7 +784,13 @@ export default function UseCaseDetailPage() {
                 {/* Triggered Rules */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Triggered Criteria ({triggeredRules.length})</CardTitle>
+                    <CardTitle className="inline-flex items-center gap-2">
+                      Triggered Criteria ({triggeredRules.length})
+                      <HelpTooltip
+                        title="How Risk Tier is Determined"
+                        content="The risk tier is assigned based on rules that evaluate characteristics of your use case. Each rule contributes to the final tier. The highest triggered tier becomes the assigned tier (e.g., if any T3 rule triggers, the use case is T3)."
+                      />
+                    </CardTitle>
                     <CardDescription>
                       Rules that contributed to the risk tier assignment
                     </CardDescription>
@@ -701,6 +833,24 @@ export default function UseCaseDetailPage() {
               </Card>
             ) : (
               <>
+                {/* Artifacts Help Card */}
+                <HelpCard
+                  id="artifacts-tab-help"
+                  title="Understanding Required Artifacts"
+                  icon={<Lightbulb className="w-5 h-5" />}
+                  variant="info"
+                  content={
+                    <div className="space-y-2">
+                      <p>Artifacts are the documentation required before this use case can be approved:</p>
+                      <ul className="list-disc list-inside space-y-1">
+                        <li><strong className="text-green-700">Green checkmark:</strong> Evidence has been provided</li>
+                        <li><strong className="text-amber-700">Amber alert:</strong> Missing - needs to be provided</li>
+                      </ul>
+                      <p className="text-xs">Click the help icon on each artifact to see "What Good Looks Like" guidance.</p>
+                    </div>
+                  }
+                />
+
                 {/* Missing Evidence Alert */}
                 {missingEvidence.length > 0 && (
                   <Card className="border-amber-200 bg-amber-50">
@@ -708,6 +858,10 @@ export default function UseCaseDetailPage() {
                       <CardTitle className="flex items-center text-amber-800">
                         <AlertCircle className="w-5 h-5 mr-2" />
                         Missing Evidence ({missingEvidence.length})
+                        <HelpTooltip
+                          className="ml-2 text-amber-600"
+                          content="These artifacts must be provided before the use case can be approved. Work with the listed owner roles to gather this documentation."
+                        />
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -752,9 +906,20 @@ export default function UseCaseDetailPage() {
                                   <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5" />
                                 )}
                                 <div>
-                                  <h4 className="font-medium">{artifact.name}</h4>
+                                  <h4 className="font-medium inline-flex items-center gap-1.5">
+                                    {artifact.name}
+                                    {artifact.whatGoodLooksLike && (
+                                      <HelpTooltip
+                                        title="What Good Looks Like"
+                                        content={artifact.whatGoodLooksLike}
+                                      />
+                                    )}
+                                  </h4>
                                   <p className="text-sm text-gray-600 mt-1">{artifact.description}</p>
-                                  <p className="text-xs text-gray-500 mt-2">Owner: {artifact.ownerRole}</p>
+                                  <p className="text-xs text-gray-500 mt-2 inline-flex items-center gap-1">
+                                    Owner: {artifact.ownerRole}
+                                    <HelpTooltip content={`The ${artifact.ownerRole} team is responsible for providing this documentation.`} />
+                                  </p>
                                 </div>
                               </div>
                               {artifact.isMissing && (

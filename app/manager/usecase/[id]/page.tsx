@@ -47,6 +47,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
+import { HelpTooltip, HelpCard } from '@/components/ui/help-tooltip';
 import {
   formatDate,
   formatDateTime,
@@ -333,6 +334,27 @@ export default function ManagerUseCaseReviewPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Manager Review Help Card */}
+        <HelpCard
+          id="manager-review-help"
+          title="How to Review a Use Case"
+          icon={<Lightbulb className="w-5 h-5" />}
+          variant="tip"
+          className="mb-6"
+          content={
+            <div className="space-y-2">
+              <p>As an MRM reviewer, follow these steps:</p>
+              <ol className="list-decimal list-inside space-y-1 ml-2">
+                <li>Review the <strong>Summary</strong> tab for use case details</li>
+                <li>Go to <strong>Decision</strong> tab and click "Generate Decision" to run the rules engine</li>
+                <li>Review the assigned tier, triggered rules, and risk flags</li>
+                <li>Check <strong>Required Artifacts</strong> tab for missing documentation</li>
+                <li>Either <strong>Approve</strong> or <strong>Send Back</strong> with specific feedback</li>
+              </ol>
+            </div>
+          }
+        />
+
         {/* Review Actions Card */}
         {canTakeAction && (
           <Card className="mb-6 border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50">
@@ -340,6 +362,19 @@ export default function ManagerUseCaseReviewPage() {
               <CardTitle className="flex items-center text-purple-800">
                 <Eye className="w-5 h-5 mr-2" />
                 Review Actions
+                <HelpTooltip
+                  className="ml-2"
+                  title="Taking Action on a Use Case"
+                  content={
+                    <div>
+                      <p className="mb-2">You can take two actions:</p>
+                      <ul className="space-y-1">
+                        <li><strong>Approve:</strong> The use case meets requirements and can proceed. Requires a generated decision.</li>
+                        <li><strong>Send Back:</strong> Returns to the owner with feedback. Use for missing information, incomplete artifacts, or concerns.</li>
+                      </ul>
+                    </div>
+                  }
+                />
               </CardTitle>
               <CardDescription>
                 Review the submission details below and take action.
@@ -575,16 +610,74 @@ export default function ManagerUseCaseReviewPage() {
                         <span className="text-sm text-gray-500">Triggered Rules</span>
                         <span className="text-sm font-medium">{triggeredRules.length}</span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500">Required Artifacts</span>
-                        <span className="text-sm font-medium">{requiredArtifacts.length}</span>
-                      </div>
-                      {missingEvidence.length > 0 && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-500">Missing Evidence</span>
-                          <span className="text-sm font-medium text-amber-600">{missingEvidence.length}</span>
+
+                      {/* Artifacts Summary with expandable list */}
+                      <div className="border-t pt-3 mt-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700">Required Artifacts</span>
+                          <Badge variant="outline">{requiredArtifacts.length}</Badge>
                         </div>
-                      )}
+
+                        {/* Show artifact names grouped by status */}
+                        {artifactsConfig && requiredArtifacts.length > 0 && (
+                          <div className="space-y-2">
+                            {/* Missing artifacts first (highlighted) */}
+                            {missingEvidence.length > 0 && (
+                              <div className="bg-amber-50 rounded-md p-2">
+                                <div className="flex items-center gap-1.5 text-amber-700 text-xs font-medium mb-1.5">
+                                  <AlertCircle className="w-3 h-3" />
+                                  Missing ({missingEvidence.length})
+                                </div>
+                                <ul className="space-y-0.5">
+                                  {missingEvidence.slice(0, 5).map((id: string) => {
+                                    const artifact = artifactsConfig.artifacts[id];
+                                    return (
+                                      <li key={id} className="text-xs text-amber-800 flex items-start">
+                                        <span className="mr-1">•</span>
+                                        <span>{artifact?.name || id}</span>
+                                      </li>
+                                    );
+                                  })}
+                                  {missingEvidence.length > 5 && (
+                                    <li className="text-xs text-amber-600 italic">
+                                      +{missingEvidence.length - 5} more...
+                                    </li>
+                                  )}
+                                </ul>
+                              </div>
+                            )}
+
+                            {/* Provided artifacts */}
+                            {requiredArtifacts.length > missingEvidence.length && (
+                              <div className="bg-green-50 rounded-md p-2">
+                                <div className="flex items-center gap-1.5 text-green-700 text-xs font-medium mb-1.5">
+                                  <CheckCircle className="w-3 h-3" />
+                                  Provided ({requiredArtifacts.length - missingEvidence.length})
+                                </div>
+                                <ul className="space-y-0.5">
+                                  {requiredArtifacts
+                                    .filter((id: string) => !missingEvidence.includes(id))
+                                    .slice(0, 5)
+                                    .map((id: string) => {
+                                      const artifact = artifactsConfig.artifacts[id];
+                                      return (
+                                        <li key={id} className="text-xs text-green-800 flex items-start">
+                                          <span className="mr-1">•</span>
+                                          <span>{artifact?.name || id}</span>
+                                        </li>
+                                      );
+                                    })}
+                                  {requiredArtifacts.length - missingEvidence.length > 5 && (
+                                    <li className="text-xs text-green-600 italic">
+                                      +{requiredArtifacts.length - missingEvidence.length - 5} more...
+                                    </li>
+                                  )}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 )}

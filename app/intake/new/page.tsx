@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Save, Send, Check, BarChart3 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save, Send, Check, BarChart3, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +20,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
+import { HelpTooltip, HelpCard } from '@/components/ui/help-tooltip';
 import {
   BUSINESS_LINES,
   REGULATORY_DOMAINS,
@@ -247,8 +248,19 @@ export default function NewIntakePage() {
                 {/* Step 1: Overview */}
                 {currentStep === 1 && (
                   <>
+                    <HelpCard
+                      id="intake-step1-help"
+                      title="Getting Started with Your Intake"
+                      icon={<Lightbulb className="w-5 h-5" />}
+                      variant="tip"
+                      content="Start by providing basic information about your AI/ML use case. Be specific in your description as this helps the risk assessment process."
+                    />
+
                     <div className="space-y-2">
-                      <Label htmlFor="title">Title *</Label>
+                      <Label htmlFor="title" className="inline-flex items-center gap-1.5">
+                        Title *
+                        <HelpTooltip content="A clear, descriptive name that identifies this use case. Example: 'Customer Churn Prediction Model' or 'Document Classification Assistant'" />
+                      </Label>
                       <Input
                         id="title"
                         placeholder="Enter a descriptive title for this use case"
@@ -258,7 +270,10 @@ export default function NewIntakePage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="businessLine">Business Line *</Label>
+                      <Label htmlFor="businessLine" className="inline-flex items-center gap-1.5">
+                        Business Line *
+                        <HelpTooltip content="The business unit or department that owns this use case. This helps route the intake to the appropriate reviewers and apply relevant policies." />
+                      </Label>
                       <Select
                         value={formData.businessLine}
                         onValueChange={(value) => updateForm('businessLine', value)}
@@ -277,7 +292,13 @@ export default function NewIntakePage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="description">Description *</Label>
+                      <Label htmlFor="description" className="inline-flex items-center gap-1.5">
+                        Description *
+                        <HelpTooltip
+                          title="Use Case Description"
+                          content="Explain what this AI/ML system does, its business purpose, and expected outcomes. Include: what problem it solves, how it works at a high level, and what decisions or actions it enables."
+                        />
+                      </Label>
                       <Textarea
                         id="description"
                         placeholder="Describe the use case, its purpose, and expected outcomes"
@@ -288,7 +309,10 @@ export default function NewIntakePage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="intendedUsers">Intended Users</Label>
+                      <Label htmlFor="intendedUsers" className="inline-flex items-center gap-1.5">
+                        Intended Users
+                        <HelpTooltip content="Who will interact with or use the outputs of this system? Examples: internal analysts, customer service reps, external customers, automated systems." />
+                      </Label>
                       <Input
                         id="intendedUsers"
                         placeholder="Who will use this system?"
@@ -302,8 +326,40 @@ export default function NewIntakePage() {
                 {/* Step 2: Use & Impact */}
                 {currentStep === 2 && (
                   <>
+                    <HelpCard
+                      id="intake-step2-help"
+                      title="Why This Step Matters"
+                      icon={<Lightbulb className="w-5 h-5" />}
+                      variant="warning"
+                      content={
+                        <div>
+                          <p>These questions are <strong>key risk drivers</strong> that significantly impact your tier assignment:</p>
+                          <ul className="list-disc list-inside mt-1 space-y-0.5">
+                            <li><strong>Decisioning</strong> use cases typically require T3 (highest oversight)</li>
+                            <li><strong>Direct customer impact</strong> triggers enhanced scrutiny</li>
+                            <li><strong>No human oversight</strong> requires additional controls</li>
+                          </ul>
+                        </div>
+                      }
+                    />
+
                     <div className="space-y-3">
-                      <Label>Usage Type *</Label>
+                      <Label className="inline-flex items-center gap-1.5">
+                        Usage Type *
+                        <HelpTooltip
+                          title="Usage Type - Critical Risk Factor"
+                          content={
+                            <div>
+                              <p className="mb-2">How is the AI output used in your process?</p>
+                              <ul className="space-y-1">
+                                <li><strong>Decisioning:</strong> Output directly determines an outcome (approval/denial, pricing, risk score). Highest risk tier.</li>
+                                <li><strong>Advisory:</strong> Output informs humans who make the final decision. Moderate risk.</li>
+                                <li><strong>Automation:</strong> Productivity tool with no material business decisions. Lower risk.</li>
+                              </ul>
+                            </div>
+                          }
+                        />
+                      </Label>
                       <RadioGroup
                         value={formData.usageType}
                         onValueChange={(value) => updateForm('usageType', value)}
@@ -333,7 +389,22 @@ export default function NewIntakePage() {
                     </div>
 
                     <div className="space-y-3">
-                      <Label>Customer Impact *</Label>
+                      <Label className="inline-flex items-center gap-1.5">
+                        Customer Impact *
+                        <HelpTooltip
+                          title="Customer Impact Level"
+                          content={
+                            <div>
+                              <p className="mb-2">Does this AI affect customers?</p>
+                              <ul className="space-y-1">
+                                <li><strong>Direct:</strong> Customers see or are affected by the output (credit decisions, pricing, recommendations). Triggers materiality review.</li>
+                                <li><strong>Indirect:</strong> Influences internal processes that eventually affect customers.</li>
+                                <li><strong>None:</strong> Purely internal operations with no customer exposure.</li>
+                              </ul>
+                            </div>
+                          }
+                        />
+                      </Label>
                       <RadioGroup
                         value={formData.customerImpact}
                         onValueChange={(value) => updateForm('customerImpact', value)}
@@ -354,7 +425,22 @@ export default function NewIntakePage() {
                     </div>
 
                     <div className="space-y-3">
-                      <Label>Human-in-the-Loop *</Label>
+                      <Label className="inline-flex items-center gap-1.5">
+                        Human-in-the-Loop *
+                        <HelpTooltip
+                          title="Human Oversight Controls"
+                          content={
+                            <div>
+                              <p className="mb-2">What level of human oversight exists?</p>
+                              <ul className="space-y-1">
+                                <li><strong>Required:</strong> A human must review and approve every output before action is taken. Strongest control.</li>
+                                <li><strong>Optional:</strong> Humans can intervene or override, but the system can act autonomously.</li>
+                                <li><strong>None:</strong> Fully automated with no human review. Requires justification for high-impact use cases.</li>
+                              </ul>
+                            </div>
+                          }
+                        />
+                      </Label>
                       <RadioGroup
                         value={formData.humanInLoop}
                         onValueChange={(value) => updateForm('humanInLoop', value)}
@@ -375,7 +461,10 @@ export default function NewIntakePage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="downstreamDecisions">Downstream Decisions Affected</Label>
+                      <Label htmlFor="downstreamDecisions" className="inline-flex items-center gap-1.5">
+                        Downstream Decisions Affected
+                        <HelpTooltip content="List any business decisions, processes, or systems that depend on or are influenced by this AI's output. This helps identify the scope of impact." />
+                      </Label>
                       <Textarea
                         id="downstreamDecisions"
                         placeholder="What business decisions or processes are affected by this use case?"
@@ -389,8 +478,31 @@ export default function NewIntakePage() {
                 {/* Step 3: AI/Model Details */}
                 {currentStep === 3 && (
                   <>
+                    <HelpCard
+                      id="intake-step3-help"
+                      title="AI/ML Type Determines Requirements"
+                      icon={<Lightbulb className="w-5 h-5" />}
+                      variant="info"
+                      content="GenAI systems have additional requirements including hallucination testing, prompt injection security testing, and guardrails documentation. Traditional ML models focus on validation, backtesting, and performance monitoring."
+                    />
+
                     <div className="space-y-3">
-                      <Label>AI/ML Type *</Label>
+                      <Label className="inline-flex items-center gap-1.5">
+                        AI/ML Type *
+                        <HelpTooltip
+                          title="Technology Type"
+                          content={
+                            <div>
+                              <ul className="space-y-1">
+                                <li><strong>Traditional ML:</strong> Classification, regression, clustering, time series models</li>
+                                <li><strong>GenAI:</strong> LLMs (GPT, Claude, etc.), image generators, text-to-X systems</li>
+                                <li><strong>Hybrid:</strong> Systems combining both (e.g., RAG with ML ranking)</li>
+                                <li><strong>Rules-Based:</strong> Deterministic logic without learning components</li>
+                              </ul>
+                            </div>
+                          }
+                        />
+                      </Label>
                       <RadioGroup
                         value={formData.aiType}
                         onValueChange={(value) => updateForm('aiType', value)}
@@ -427,7 +539,22 @@ export default function NewIntakePage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Deployment *</Label>
+                      <Label className="inline-flex items-center gap-1.5">
+                        Deployment *
+                        <HelpTooltip
+                          title="Deployment Context"
+                          content={
+                            <div>
+                              <ul className="space-y-1">
+                                <li><strong>Internal tool:</strong> Used only by employees (lower risk)</li>
+                                <li><strong>Customer-facing:</strong> Directly interacts with customers (higher scrutiny)</li>
+                                <li><strong>3rd-party:</strong> Integrates with external systems (vendor risk considerations)</li>
+                                <li><strong>Embedded:</strong> Built into a product or service</li>
+                              </ul>
+                            </div>
+                          }
+                        />
+                      </Label>
                       <Select
                         value={formData.deployment}
                         onValueChange={(value) => updateForm('deployment', value)}
@@ -445,9 +572,12 @@ export default function NewIntakePage() {
                     </div>
 
                     <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <Label>Vendor/3rd Party Involved</Label>
-                        <p className="text-sm text-gray-500">Is this model provided by or depends on a third-party vendor?</p>
+                      <div className="flex items-start gap-2">
+                        <div>
+                          <Label>Vendor/3rd Party Involved</Label>
+                          <p className="text-sm text-gray-500">Is this model provided by or depends on a third-party vendor?</p>
+                        </div>
+                        <HelpTooltip content="If yes, additional vendor due diligence artifacts will be required including contract review, SLA documentation, and vendor risk assessment." />
                       </div>
                       <Switch
                         checked={formData.vendorInvolved}
@@ -468,12 +598,21 @@ export default function NewIntakePage() {
                     )}
 
                     <div className="space-y-4 pt-4 border-t">
-                      <h4 className="font-medium">Model Characteristics</h4>
+                      <h4 className="font-medium inline-flex items-center gap-1.5">
+                        Model Characteristics
+                        <HelpTooltip content="These characteristics help determine if this system meets the regulatory definition of a 'model' under SR 11-7 guidance and what controls are needed." />
+                      </h4>
 
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div>
-                          <Label>Influences Business Decisions</Label>
-                          <p className="text-sm text-gray-500">Does the output directly influence business decisions?</p>
+                        <div className="flex items-start gap-2">
+                          <div>
+                            <Label>Influences Business Decisions</Label>
+                            <p className="text-sm text-gray-500">Does the output directly influence business decisions?</p>
+                          </div>
+                          <HelpTooltip
+                            title="Model Definition Trigger"
+                            content="Under SR 11-7, a 'model' is a quantitative method that applies theories, techniques, and assumptions to process input data into quantitative estimates. If this influences material business decisions, it likely meets the model definition."
+                          />
                         </div>
                         <Switch
                           checked={formData.modelDefinitionTrigger}
@@ -482,9 +621,15 @@ export default function NewIntakePage() {
                       </div>
 
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div>
-                          <Label>Explainability Required</Label>
-                          <p className="text-sm text-gray-500">Is model explainability a business or regulatory requirement?</p>
+                        <div className="flex items-start gap-2">
+                          <div>
+                            <Label>Explainability Required</Label>
+                            <p className="text-sm text-gray-500">Is model explainability a business or regulatory requirement?</p>
+                          </div>
+                          <HelpTooltip
+                            title="Explainability / Interpretability"
+                            content="Some use cases (especially in lending, credit, or regulated domains) require the ability to explain why the model made a particular decision. This affects model architecture choices and documentation requirements."
+                          />
                         </div>
                         <Switch
                           checked={formData.explainabilityRequired}
@@ -493,9 +638,12 @@ export default function NewIntakePage() {
                       </div>
 
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div>
-                          <Label>Fallback Plan Defined</Label>
-                          <p className="text-sm text-gray-500">Is there a documented fallback if the model fails?</p>
+                        <div className="flex items-start gap-2">
+                          <div>
+                            <Label>Fallback Plan Defined</Label>
+                            <p className="text-sm text-gray-500">Is there a documented fallback if the model fails?</p>
+                          </div>
+                          <HelpTooltip content="A fallback plan describes what happens if the model becomes unavailable or produces unreliable results. This is a required control for high-risk use cases." />
                         </div>
                         <Switch
                           checked={formData.fallbackPlanDefined}
@@ -509,13 +657,30 @@ export default function NewIntakePage() {
                 {/* Step 4: Data & Privacy */}
                 {currentStep === 4 && (
                   <>
+                    <HelpCard
+                      id="intake-step4-help"
+                      title="Data Privacy Compliance"
+                      icon={<Lightbulb className="w-5 h-5" />}
+                      variant="warning"
+                      content="Use cases involving PII, NPI, or sensitive attributes trigger additional privacy requirements including Data Privacy Impact Assessments, retention policies, and enhanced access controls."
+                    />
+
                     <div className="space-y-4">
-                      <h4 className="font-medium">Data Sensitivity</h4>
+                      <h4 className="font-medium inline-flex items-center gap-1.5">
+                        Data Sensitivity
+                        <HelpTooltip content="Indicate what types of sensitive data this AI system processes. This drives privacy and compliance requirements." />
+                      </h4>
 
                       <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <Label>Contains PII</Label>
-                          <p className="text-sm text-gray-500">Personally Identifiable Information (name, SSN, address, etc.)</p>
+                        <div className="flex items-start gap-2">
+                          <div>
+                            <Label>Contains PII</Label>
+                            <p className="text-sm text-gray-500">Personally Identifiable Information (name, SSN, address, etc.)</p>
+                          </div>
+                          <HelpTooltip
+                            title="Personally Identifiable Information (PII)"
+                            content="Any data that can identify an individual: names, addresses, SSN, email, phone numbers, biometric data, IP addresses, etc. Triggers privacy compliance requirements."
+                          />
                         </div>
                         <Switch
                           checked={formData.containsPii}
@@ -524,9 +689,15 @@ export default function NewIntakePage() {
                       </div>
 
                       <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <Label>Contains NPI</Label>
-                          <p className="text-sm text-gray-500">Non-Public Personal Information (financial data, account numbers)</p>
+                        <div className="flex items-start gap-2">
+                          <div>
+                            <Label>Contains NPI</Label>
+                            <p className="text-sm text-gray-500">Non-Public Personal Information (financial data, account numbers)</p>
+                          </div>
+                          <HelpTooltip
+                            title="Non-Public Personal Information (NPI)"
+                            content="Financial information not publicly available: account numbers, transaction history, credit scores, income data. Regulated under GLBA (Gramm-Leach-Bliley Act)."
+                          />
                         </div>
                         <Switch
                           checked={formData.containsNpi}
@@ -535,9 +706,15 @@ export default function NewIntakePage() {
                       </div>
 
                       <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <Label>Sensitive Attributes Used</Label>
-                          <p className="text-sm text-gray-500">Age, gender, race, ethnicity, or other protected characteristics</p>
+                        <div className="flex items-start gap-2">
+                          <div>
+                            <Label>Sensitive Attributes Used</Label>
+                            <p className="text-sm text-gray-500">Age, gender, race, ethnicity, or other protected characteristics</p>
+                          </div>
+                          <HelpTooltip
+                            title="Protected/Sensitive Attributes"
+                            content="Characteristics protected under fair lending and anti-discrimination laws: race, color, religion, national origin, sex, marital status, age. Using these (directly or as proxies) triggers fairness and bias testing requirements."
+                          />
                         </div>
                         <Switch
                           checked={formData.sensitiveAttributesUsed}
@@ -547,7 +724,10 @@ export default function NewIntakePage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Training Data Source</Label>
+                      <Label className="inline-flex items-center gap-1.5">
+                        Training Data Source
+                        <HelpTooltip content="Where does the data used to train or operate this model come from? This affects data quality assessment and vendor management requirements." />
+                      </Label>
                       <Select
                         value={formData.trainingDataSource || ''}
                         onValueChange={(value) => updateForm('trainingDataSource', value)}
@@ -566,10 +746,16 @@ export default function NewIntakePage() {
                     </div>
 
                     <div className="space-y-4 pt-4 border-t">
-                      <h4 className="font-medium">Data Controls</h4>
+                      <h4 className="font-medium inline-flex items-center gap-1.5">
+                        Data Controls
+                        <HelpTooltip content="Indicate which data governance controls are already in place. Missing controls may be identified as requirements." />
+                      </h4>
 
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <Label>Retention Policy Defined</Label>
+                        <div className="flex items-center gap-2">
+                          <Label>Retention Policy Defined</Label>
+                          <HelpTooltip content="A documented policy specifying how long data is kept and when it's deleted. Required for PII/NPI handling." />
+                        </div>
                         <Switch
                           checked={formData.retentionPolicyDefined}
                           onCheckedChange={(checked) => updateForm('retentionPolicyDefined', checked)}
@@ -577,7 +763,10 @@ export default function NewIntakePage() {
                       </div>
 
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <Label>Logging Required</Label>
+                        <div className="flex items-center gap-2">
+                          <Label>Logging Required</Label>
+                          <HelpTooltip content="Whether model inputs, outputs, and decisions need to be logged for audit and monitoring purposes." />
+                        </div>
                         <Switch
                           checked={formData.loggingRequired}
                           onCheckedChange={(checked) => updateForm('loggingRequired', checked)}
@@ -585,7 +774,10 @@ export default function NewIntakePage() {
                       </div>
 
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <Label>Access Controls Defined</Label>
+                        <div className="flex items-center gap-2">
+                          <Label>Access Controls Defined</Label>
+                          <HelpTooltip content="Role-based access controls specifying who can access the model, its data, and its outputs." />
+                        </div>
                         <Switch
                           checked={formData.accessControlsDefined}
                           onCheckedChange={(checked) => updateForm('accessControlsDefined', checked)}
@@ -594,7 +786,13 @@ export default function NewIntakePage() {
                     </div>
 
                     <div className="space-y-3 pt-4 border-t">
-                      <Label>Regulatory Domains</Label>
+                      <Label className="inline-flex items-center gap-1.5">
+                        Regulatory Domains
+                        <HelpTooltip
+                          title="Applicable Regulations"
+                          content="Select all regulations that may apply to this use case. This determines specific compliance artifacts and review requirements. When in doubt, select domains that might apply - they can be removed during review."
+                        />
+                      </Label>
                       <p className="text-sm text-gray-500">Select all applicable regulatory domains</p>
                       <div className="grid grid-cols-2 gap-2">
                         {REGULATORY_DOMAINS.map((domain) => (
@@ -620,8 +818,32 @@ export default function NewIntakePage() {
                 {/* Step 5: Controls & Monitoring */}
                 {currentStep === 5 && (
                   <>
+                    <HelpCard
+                      id="intake-step5-help"
+                      title="Ongoing Monitoring Requirements"
+                      icon={<Lightbulb className="w-5 h-5" />}
+                      variant="info"
+                      content="Even after approval, AI systems require ongoing monitoring to ensure they continue to perform as expected. The frequency and depth of monitoring depends on the risk tier."
+                    />
+
                     <div className="space-y-2">
-                      <Label>Monitoring Cadence</Label>
+                      <Label className="inline-flex items-center gap-1.5">
+                        Monitoring Cadence
+                        <HelpTooltip
+                          title="Performance Monitoring Frequency"
+                          content={
+                            <div>
+                              <p className="mb-2">How often will model performance be reviewed?</p>
+                              <ul className="space-y-1">
+                                <li><strong>Daily:</strong> High-risk, fast-changing environments</li>
+                                <li><strong>Weekly:</strong> Active monitoring for important systems</li>
+                                <li><strong>Monthly:</strong> Standard for medium-risk use cases</li>
+                                <li><strong>Quarterly:</strong> Minimum for low-risk systems</li>
+                              </ul>
+                            </div>
+                          }
+                        />
+                      </Label>
                       <Select
                         value={formData.monitoringCadence || ''}
                         onValueChange={(value) => updateForm('monitoringCadence', value)}
@@ -640,7 +862,10 @@ export default function NewIntakePage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="humanReviewProcess">Human Review Process</Label>
+                      <Label htmlFor="humanReviewProcess" className="inline-flex items-center gap-1.5">
+                        Human Review Process
+                        <HelpTooltip content="Describe how humans will review model outputs. Include: who reviews, how often, what triggers escalation, and how overrides are documented." />
+                      </Label>
                       <Textarea
                         id="humanReviewProcess"
                         placeholder="Describe the human review process for model outputs"
@@ -650,7 +875,10 @@ export default function NewIntakePage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="incidentResponseContact">Incident Response Contact</Label>
+                      <Label htmlFor="incidentResponseContact" className="inline-flex items-center gap-1.5">
+                        Incident Response Contact
+                        <HelpTooltip content="Who should be contacted if the model produces unexpected results, fails, or causes an issue? This is critical for operational readiness." />
+                      </Label>
                       <Input
                         id="incidentResponseContact"
                         placeholder="Email or contact for incidents"

@@ -17,6 +17,9 @@ import {
   Inbox,
   Eye,
   Settings,
+  TrendingUp,
+  Download,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +36,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatDate, getTierBadgeColor, getStatusColor, truncate } from '@/lib/utils';
 import type { UseCaseWithRelations } from '@/lib/types';
 import { useToast } from '@/components/ui/use-toast';
+import { HelpTooltip, HelpCard } from '@/components/ui/help-tooltip';
 
 interface DashboardStats {
   total: number;
@@ -169,6 +173,12 @@ export default function ManagerDashboard() {
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Load Demo Data
               </Button>
+              <Link href="/manager/reports">
+                <Button variant="outline" size="sm" className="border-purple-300 text-purple-700 hover:bg-purple-50">
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  Reports & Analytics
+                </Button>
+              </Link>
               <Link href="/admin">
                 <Button variant="outline" size="sm">
                   <Settings className="w-4 h-4 mr-2" />
@@ -181,6 +191,26 @@ export default function ManagerDashboard() {
       </header>
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* MRM Help Card */}
+        <HelpCard
+          id="mrm-dashboard-intro"
+          title="Welcome to the MRM Dashboard"
+          variant="info"
+          className="mb-6"
+          content={
+            <div className="space-y-2">
+              <p>As a Model Risk Manager, you can:</p>
+              <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
+                <li><strong>Review submitted intakes</strong> in the table below (highlighted in blue)</li>
+                <li><strong>Generate risk decisions</strong> based on automated rules and AI insights</li>
+                <li><strong>Approve or send back</strong> use cases with feedback</li>
+                <li><strong>View analytics</strong> using the "Reports & Analytics" button</li>
+                <li><strong>Export reports</strong> for regulatory exams and leadership</li>
+              </ul>
+            </div>
+          }
+        />
+
         {/* Pending Review Banner */}
         {pendingCases.length > 0 && (
           <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -202,8 +232,9 @@ export default function ManagerDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+              <CardTitle className="text-sm font-medium text-gray-500 inline-flex items-center gap-1">
                 Total Submitted
+                <HelpTooltip content="All use cases that have been submitted for MRM review (excludes drafts)" />
               </CardTitle>
               <FileText className="w-4 h-4 text-gray-400" />
             </CardHeader>
@@ -218,8 +249,9 @@ export default function ManagerDashboard() {
 
           <Card className={pendingCases.length > 0 ? 'ring-2 ring-blue-300' : ''}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+              <CardTitle className="text-sm font-medium text-gray-500 inline-flex items-center gap-1">
                 Pending Review
+                <HelpTooltip content="Use cases awaiting your review. Click any item in the table to begin review." />
               </CardTitle>
               <Clock className="w-4 h-4 text-blue-400" />
             </CardHeader>
@@ -234,8 +266,9 @@ export default function ManagerDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+              <CardTitle className="text-sm font-medium text-gray-500 inline-flex items-center gap-1">
                 Approved
+                <HelpTooltip content="Use cases that have completed MRM review and received approval" />
               </CardTitle>
               <CheckCircle className="w-4 h-4 text-green-400" />
             </CardHeader>
@@ -250,8 +283,9 @@ export default function ManagerDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+              <CardTitle className="text-sm font-medium text-gray-500 inline-flex items-center gap-1">
                 Sent Back
+                <HelpTooltip content="Use cases returned to the owner for additional information or revisions" />
               </CardTitle>
               <AlertTriangle className="w-4 h-4 text-orange-400" />
             </CardHeader>
@@ -266,8 +300,12 @@ export default function ManagerDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+              <CardTitle className="text-sm font-medium text-gray-500 inline-flex items-center gap-1">
                 High Risk (T3)
+                <HelpTooltip
+                  title="High Risk Models"
+                  content="T3 models require the most rigorous governance: full validation, senior approval, enhanced monitoring, and comprehensive documentation. These typically involve customer-facing decisions or regulated activities."
+                />
               </CardTitle>
               <AlertTriangle className="w-4 h-4 text-red-400" />
             </CardHeader>
