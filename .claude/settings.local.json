@@ -10,7 +10,12 @@
       "Bash(npm run build:*)",
       "Bash(tree:*)",
       "Bash(dir:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(curl:*)",
+      "Bash(head:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(npx next build)",
+      "Bash(wc:*)"
     ]
   }
 }
