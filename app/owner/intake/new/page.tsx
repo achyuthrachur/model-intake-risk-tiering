@@ -67,7 +67,7 @@ const defaultFormData: UseCaseFormData = {
   incidentResponseContact: '',
 };
 
-export default function NewIntakePage() {
+export default function OwnerNewIntakePage() {
   const router = useRouter();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
@@ -100,7 +100,7 @@ export default function NewIntakePage() {
 
       const useCase = await response.json();
       toast({ title: 'Saved', description: 'Use case saved as draft' });
-      router.push(`/usecase/${useCase.id}`);
+      router.push(`/owner/usecase/${useCase.id}`);
     } catch (error) {
       toast({ title: 'Error', description: 'Failed to save use case', variant: 'destructive' });
     } finally {
@@ -112,7 +112,6 @@ export default function NewIntakePage() {
     try {
       setSaving(true);
 
-      // First create the use case
       const createResponse = await fetch('/api/usecases', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -126,7 +125,6 @@ export default function NewIntakePage() {
 
       const useCase = await createResponse.json();
 
-      // Then submit it
       const submitResponse = await fetch(`/api/usecases/${useCase.id}/submit`, {
         method: 'POST',
       });
@@ -137,7 +135,7 @@ export default function NewIntakePage() {
       }
 
       toast({ title: 'Submitted', description: 'Use case submitted for review' });
-      router.push(`/usecase/${useCase.id}`);
+      router.push(`/owner/usecase/${useCase.id}`);
     } catch (error) {
       console.error('Submit error:', error);
       toast({
@@ -170,7 +168,7 @@ export default function NewIntakePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link href="/dashboard">
+              <Link href="/owner/dashboard">
                 <Button variant="ghost" size="sm">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
@@ -178,7 +176,7 @@ export default function NewIntakePage() {
               </Link>
               <div className="h-6 w-px bg-gray-200" />
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <BarChart3 className="w-5 h-5 text-white" />
                 </div>
                 <h1 className="text-lg font-semibold text-gray-900">New Intake</h1>
@@ -667,8 +665,8 @@ export default function NewIntakePage() {
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <h4 className="font-medium text-blue-900 mb-2">Ready to Submit</h4>
                       <p className="text-sm text-blue-800">
-                        Review the information below. Once submitted, the system will analyze your use case
-                        and generate a risk tier assignment with required artifacts.
+                        Review the information below. Once submitted, the Model Risk Manager will review your use case
+                        and either approve it or send it back with feedback.
                       </p>
                     </div>
 

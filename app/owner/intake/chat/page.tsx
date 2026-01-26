@@ -14,14 +14,12 @@ import { useToast } from '@/components/ui/use-toast';
 // Helper to extract JSON from assistant messages
 function extractJsonFromMessage(content: string): Partial<UseCaseFormData> | null {
   try {
-    // Look for JSON block in the message
     const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[1]);
       return parsed.extracted || {};
     }
 
-    // Try to find inline JSON object
     const inlineMatch = content.match(/\{[^{}]*"extracted"[^{}]*\}/);
     if (inlineMatch) {
       const parsed = JSON.parse(inlineMatch[0]);
@@ -34,7 +32,7 @@ function extractJsonFromMessage(content: string): Partial<UseCaseFormData> | nul
   }
 }
 
-export default function ChatIntakePage() {
+export default function OwnerChatIntakePage() {
   const router = useRouter();
   const { toast } = useToast();
   const [collectedData, setCollectedData] = useState<Partial<UseCaseFormData>>({});
@@ -60,13 +58,11 @@ This will just take a few minutes. Let's start with the basics - what's the name
       },
     ],
     onFinish: (message) => {
-      // Extract structured data from assistant response
       const extracted = extractJsonFromMessage(message.content);
       if (extracted && Object.keys(extracted).length > 0) {
         setCollectedData((prev) => ({ ...prev, ...extracted }));
       }
 
-      // Check for completion marker
       if (message.content.includes('"complete": true') || message.content.includes('"isComplete": true')) {
         setIsComplete(true);
       }
@@ -106,7 +102,6 @@ This will just take a few minutes. Let's start with the basics - what's the name
   const handleSubmitUseCase = async () => {
     setIsSubmitting(true);
     try {
-      // Validate required fields
       const requiredFields = ['title', 'businessLine', 'description', 'aiType', 'usageType', 'humanInLoop', 'customerImpact', 'deployment'];
       const missing = requiredFields.filter(field => !collectedData[field as keyof typeof collectedData]);
 
@@ -120,13 +115,11 @@ This will just take a few minutes. Let's start with the basics - what's the name
         return;
       }
 
-      // Ensure we have minimum required data
       const dataToSubmit = {
         ...collectedData,
         regulatoryDomains: collectedData.regulatoryDomains || [],
       };
 
-      // Create the use case
       const response = await fetch('/api/usecases', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -140,7 +133,6 @@ This will just take a few minutes. Let's start with the basics - what's the name
 
       const useCase = await response.json();
 
-      // Submit for review
       const submitResponse = await fetch(`/api/usecases/${useCase.id}/submit`, {
         method: 'POST',
       });
@@ -155,7 +147,7 @@ This will just take a few minutes. Let's start with the basics - what's the name
         description: 'Your use case has been submitted for governance review.',
       });
 
-      router.push(`/usecase/${useCase.id}`);
+      router.push(`/owner/usecase/${useCase.id}`);
     } catch (error) {
       console.error('Submit error:', error);
       toast({
@@ -173,14 +165,14 @@ This will just take a few minutes. Let's start with the basics - what's the name
       {/* Navigation */}
       <div className="border-b bg-white px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard">
+          <Link href="/owner/dashboard">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard
             </Button>
           </Link>
         </div>
-        <Link href="/intake/new">
+        <Link href="/owner/intake/new">
           <Button variant="outline" size="sm">
             <FileText className="w-4 h-4 mr-2" />
             Use Standard Form

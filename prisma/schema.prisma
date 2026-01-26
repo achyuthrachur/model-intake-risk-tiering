@@ -46,10 +46,15 @@ model UseCase {
   incidentResponseContact String?
 
   // Status & Metadata
-  status                  String       @default("Draft") // Draft / Submitted / Under Review / Approved / Rejected
+  status                  String       @default("Draft") // Draft / Submitted / Under Review / Approved / Rejected / Sent Back
   createdBy               String       @default("demo-user")
   createdAt               DateTime     @default(now())
   updatedAt               DateTime     @updatedAt
+
+  // Review fields (for MRM workflow)
+  reviewerNotes           String?      // Notes from MRM when sent back
+  reviewedBy              String?      // MRM who reviewed
+  reviewedAt              DateTime?    // When reviewed
 
   // Relations
   decision                Decision?

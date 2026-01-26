@@ -63,6 +63,8 @@ export function getStatusColor(status: string): string {
       return 'bg-green-100 text-green-700';
     case 'Rejected':
       return 'bg-red-100 text-red-700';
+    case 'Sent Back':
+      return 'bg-orange-100 text-orange-700';
     default:
       return 'bg-gray-100 text-gray-700';
   }

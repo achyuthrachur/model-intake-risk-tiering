@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, BarChart3, Shield, Brain, FileCheck, Layers } from 'lucide-react';
+import { ArrowRight, BarChart3, Shield, Brain, FileCheck, Layers, User, ClipboardCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function WelcomePage() {
   return (
@@ -73,15 +74,46 @@ export default function WelcomePage() {
             </div>
           </div>
 
-          {/* CTA Button */}
-          <Link href="/dashboard">
-            <Button size="lg" className="text-lg px-8 py-6">
-              Get Started
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          </Link>
-          <p className="mt-4 text-sm text-gray-500">
-            No account required. Start managing your AI use cases today.
+          {/* Role Selection */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            <Link href="/owner/dashboard" className="block">
+              <Card className="h-full hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:bg-blue-200 transition-colors">
+                    <User className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">I'm a Model Owner</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Submit new AI/ML use cases for review, track your submissions, and respond to feedback.
+                  </p>
+                  <Button className="w-full group-hover:bg-primary/90">
+                    Get Started
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/manager/dashboard" className="block">
+              <Card className="h-full hover:shadow-lg hover:border-purple-500/50 transition-all cursor-pointer group">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:bg-purple-200 transition-colors">
+                    <ClipboardCheck className="w-8 h-8 text-purple-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">I'm a Model Risk Manager</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Review submitted intakes, approve or send back with notes, and manage demo data.
+                  </p>
+                  <Button className="w-full bg-purple-600 hover:bg-purple-700 group-hover:bg-purple-700">
+                    Get Started
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+          <p className="mt-6 text-sm text-gray-500">
+            No account required. Select your role to get started.
           </p>
         </div>
       </main>

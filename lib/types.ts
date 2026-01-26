@@ -8,7 +8,7 @@ export type Deployment = 'Internal tool' | 'Customer-facing' | '3rd-party' | 'Em
 export type TrainingDataSource = 'Internal' | 'Vendor' | 'Public' | 'Unknown' | 'N/A';
 export type ChangeFrequency = 'Ad hoc' | 'Quarterly' | 'Monthly' | 'Continuous';
 export type MonitoringCadence = 'Daily' | 'Weekly' | 'Monthly' | 'Quarterly' | 'None';
-export type UseCaseStatus = 'Draft' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
+export type UseCaseStatus = 'Draft' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected' | 'Sent Back';
 export type Tier = 'T1' | 'T2' | 'T3';
 export type IsModel = 'Yes' | 'No' | 'Model-like';
 
@@ -223,6 +223,9 @@ export interface UseCaseWithRelations {
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
+  reviewerNotes: string | null;
+  reviewedBy: string | null;
+  reviewedAt: Date | null;
   decision?: {
     id: string;
     isModel: string;
