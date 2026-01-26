@@ -44,11 +44,9 @@ export default function ChatIntakePage() {
 
   const {
     messages,
-    input,
-    handleInputChange,
-    handleSubmit: handleChatSubmit,
     isLoading,
     setMessages,
+    append,
   } = useChat({
     api: '/api/ai/chat',
     body: { collectedData },
@@ -56,9 +54,9 @@ export default function ChatIntakePage() {
       {
         id: 'welcome',
         role: 'assistant',
-        content: `Hi! I'm here to help you register a new AI/ML use case for governance review. This will just take a few minutes.
+        content: `Hi! I'm here to help you register a new model or automation use case for governance review. This covers AI/ML models, traditional models, RPA, and other automated decision systems.
 
-Let's start with the basics. What's the **name** of your use case, and can you briefly describe what it does?`,
+This will just take a few minutes. Let's start with the basics - what's the name of your use case, and can you briefly describe what it does?`,
       },
     ],
     onFinish: (message) => {
@@ -82,13 +80,12 @@ Let's start with the basics. What's the **name** of your use case, and can you b
   const handleSendMessage = useCallback(
     (message: string) => {
       setAiError(null);
-      const fakeEvent = {
-        preventDefault: () => {},
-      } as React.FormEvent<HTMLFormElement>;
-      handleInputChange({ target: { value: message } } as React.ChangeEvent<HTMLInputElement>);
-      setTimeout(() => handleChatSubmit(fakeEvent), 0);
+      append({
+        role: 'user',
+        content: message,
+      });
     },
-    [handleChatSubmit, handleInputChange]
+    [append]
   );
 
   const handleStartOver = useCallback(() => {
@@ -99,9 +96,9 @@ Let's start with the basics. What's the **name** of your use case, and can you b
       {
         id: 'welcome',
         role: 'assistant',
-        content: `Hi! I'm here to help you register a new AI/ML use case for governance review. This will just take a few minutes.
+        content: `Hi! I'm here to help you register a new model or automation use case for governance review. This covers AI/ML models, traditional models, RPA, and other automated decision systems.
 
-Let's start with the basics. What's the **name** of your use case, and can you briefly describe what it does?`,
+This will just take a few minutes. Let's start with the basics - what's the name of your use case, and can you briefly describe what it does?`,
       },
     ]);
   }, [setMessages]);
@@ -157,7 +154,7 @@ Let's start with the basics. What's the **name** of your use case, and can you b
       {/* Navigation */}
       <div className="border-b bg-white px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/">
+          <Link href="/dashboard">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard

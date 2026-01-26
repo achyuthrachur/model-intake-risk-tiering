@@ -15,7 +15,10 @@
       "Bash(head:*)",
       "Bash(npx tailwindcss:*)",
       "Bash(npx next build)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(powershell -Command \"Get-Content app/page.tsx | Select-Object -Index \\(87,88,89\\)\")",
+      "Bash(npx prisma db push:*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }

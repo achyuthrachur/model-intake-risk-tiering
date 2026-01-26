@@ -42,10 +42,10 @@ export function ChatInterface({
       {/* Header */}
       <div className="border-b p-4">
         <h1 className="text-lg font-semibold text-gray-900">
-          AI-Assisted Use Case Intake
+          Model & Automation Intake
         </h1>
         <p className="text-sm text-gray-500">
-          Chat with our AI assistant to register your use case
+          Chat with our assistant to register your model, RPA, or automation use case
         </p>
       </div>
 
