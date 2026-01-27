@@ -30,7 +30,12 @@ export function generatePolicyDiff(
   elevatedRules: Array<{ id: string; name: string; from: string; to: string }> = []
 ): PolicyDiffResult {
   // Get current validation frequencies from runtime config
-  const currentFreqs = getValidationFrequencies() as ValidationFrequencies;
+  const freqs = getValidationFrequencies();
+  const currentFreqs: ValidationFrequencies = {
+    T3: freqs['T3'] ?? 12,
+    T2: freqs['T2'] ?? 24,
+    T1: freqs['T1'] ?? 36,
+  };
 
   const validationFrequencyChanges = diffValidationFrequencies(currentFreqs, newValidationFrequencies);
 

@@ -2,6 +2,7 @@ import yaml from 'js-yaml';
 import fs from 'fs';
 import path from 'path';
 import type { RulesConfig, ArtifactsConfig } from './types';
+import type { ValidationFrequencies } from './policy/types';
 import { setValidationFrequencies, resetValidationFrequencies } from './utils';
 
 let cachedRulesConfig: RulesConfig | null = null;
@@ -67,9 +68,10 @@ export async function loadValidationFrequenciesAsync(): Promise<Record<string, n
     });
 
     if (dbConfig) {
-      cachedValidationFrequencies = JSON.parse(dbConfig.configData);
-      setValidationFrequencies(cachedValidationFrequencies);
-      return cachedValidationFrequencies;
+      const freqs = JSON.parse(dbConfig.configData) as Record<string, number>;
+      cachedValidationFrequencies = freqs;
+      setValidationFrequencies(freqs);
+      return freqs;
     }
   } catch (error) {
     // Database not available or error, fall back to defaults
@@ -83,7 +85,7 @@ export async function loadValidationFrequenciesAsync(): Promise<Record<string, n
 
 // Save validation frequencies to database
 export async function saveValidationFrequencies(
-  frequencies: Record<string, number>,
+  frequencies: ValidationFrequencies | Record<string, number>,
   policyVersionId?: string,
   updatedBy: string = 'system'
 ): Promise<void> {
@@ -105,8 +107,8 @@ export async function saveValidationFrequencies(
   });
 
   // Update cache and runtime config
-  cachedValidationFrequencies = frequencies;
-  setValidationFrequencies(frequencies);
+  cachedValidationFrequencies = frequencies as Record<string, number>;
+  setValidationFrequencies(frequencies as Record<string, number>);
 }
 
 export function reloadConfigs(): void {

@@ -121,12 +121,12 @@ function evaluateCondition(condition: RuleCondition, data: Record<string, any>):
 }
 
 // Evaluate all rules and return triggered ones
-function evaluateRules(data: Record<string, any>, rules: Rule[]): Rule[] {
+export function evaluateRules(data: Record<string, any>, rules: Rule[]): Rule[] {
   return rules.filter(rule => evaluateCondition(rule.conditions, data));
 }
 
 // Determine the highest severity tier from triggered rules
-function resolveTier(triggeredRules: Rule[], defaultTier: Tier): Tier {
+export function resolveTier(triggeredRules: Rule[], defaultTier: Tier): Tier {
   const config = loadRulesConfig();
   let maxSeverity = config.tiers[defaultTier].severity;
   let resolvedTier = defaultTier;

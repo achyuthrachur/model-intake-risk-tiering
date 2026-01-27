@@ -1,9 +1,9 @@
 // Re-Tiering Logic - Apply policy changes to inventory models
 
 import prisma from '@/lib/db';
-import { evaluateRules, resolveTier } from '@/lib/rules-engine';
-import { loadRulesConfig } from '@/lib/config-loader';
+import { evaluateUseCase } from '@/lib/rules-engine';
 import type { AffectedModel, ValidationFrequencies, PolicyApplyResult } from './types';
+import type { UseCaseWithRelations } from '@/lib/types';
 
 export async function previewReTiering(
   newValidationFrequencies: ValidationFrequencies
@@ -128,7 +128,12 @@ export async function reTierSingleModel(
   const model = await prisma.inventoryModel.findUnique({
     where: { id: inventoryModelId },
     include: {
-      useCase: true,
+      useCase: {
+        include: {
+          decision: true,
+          attachments: true,
+        },
+      },
     },
   });
 
@@ -136,13 +141,12 @@ export async function reTierSingleModel(
     throw new Error(`Inventory model ${inventoryModelId} not found`);
   }
 
-  const rulesConfig = loadRulesConfig();
   const previousTier = model.tier;
 
   // Re-evaluate using rules engine
-  const useCaseData = model.useCase;
-  const evaluationResult = evaluateRules(useCaseData, rulesConfig);
-  const { tier: newTier } = resolveTier(evaluationResult, rulesConfig);
+  const useCaseData = model.useCase as UseCaseWithRelations;
+  const decisionResult = evaluateUseCase(useCaseData);
+  const newTier = decisionResult.tier;
 
   const changed = previousTier !== newTier;
 
