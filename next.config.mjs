@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: ['docx'],
+    serverComponentsExternalPackages: ['docx', 'undici'],
   },
   webpack: (config) => {
     config.resolve.fallback = {

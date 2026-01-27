@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DropZone } from './DropZone';
 import { HelpTooltip } from '@/components/ui/help-tooltip';
-import { formatFileSize } from '@/lib/storage';
+import { formatFileSize } from '@/lib/file-utils';
 import { useToast } from '@/components/ui/use-toast';
 
 interface Artifact {

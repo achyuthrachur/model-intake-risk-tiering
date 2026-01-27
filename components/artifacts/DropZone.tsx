@@ -4,7 +4,7 @@ import { useState, useCallback, useRef } from 'react';
 import { Upload, FileUp, Loader2, X, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { formatFileSize } from '@/lib/storage';
+import { formatFileSize } from '@/lib/file-utils';
 
 interface DropZoneProps {
   useCaseId: string;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
-import { uploadFile, validateFile } from '@/lib/storage';
+import { uploadFile } from '@/lib/storage';
+import { validateFile } from '@/lib/file-utils';
 
 // GET: List all attachments for a use case
 export async function GET(

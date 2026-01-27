@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { formatFileSize } from '@/lib/storage';
+import { formatFileSize } from '@/lib/file-utils';
 
 interface Attachment {
   id: string;
