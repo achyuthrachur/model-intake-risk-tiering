@@ -129,7 +129,7 @@ export default function ModelDetailPage({ params }: PageProps) {
   }
 
   // Get all findings across validations
-  const allFindings = model.validations?.flatMap((v) => v.findings) || [];
+  const allFindings = model.validations?.flatMap((v) => v.findings || []) || [];
   const openFindings = allFindings.filter(
     (f) => f.remediationStatus === 'Open' || f.remediationStatus === 'In Progress'
   );
