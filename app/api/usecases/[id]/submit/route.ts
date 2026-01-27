@@ -25,10 +25,10 @@ export async function POST(
       );
     }
 
-    // Allow submission from Draft or Revision Requested status
-    if (useCase.status !== 'Draft' && useCase.status !== 'Revision Requested') {
+    // Allow submission from Draft, Revision Requested, or Sent Back status
+    if (useCase.status !== 'Draft' && useCase.status !== 'Revision Requested' && useCase.status !== 'Sent Back') {
       return NextResponse.json(
-        { error: 'Only draft or revision requested use cases can be submitted' },
+        { error: 'Only draft, revision requested, or sent back use cases can be submitted' },
         { status: 400 }
       );
     }

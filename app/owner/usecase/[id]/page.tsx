@@ -298,6 +298,8 @@ export default function OwnerUseCaseDetailPage() {
   }
 
   const isSentBack = useCase.status === 'Sent Back';
+  const isDraft = useCase.status === 'Draft';
+  const canSubmit = isDraft || isSentBack;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -342,6 +344,40 @@ export default function OwnerUseCaseDetailPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Draft Submission Banner */}
+        {isDraft && (
+          <div className="mb-6">
+            <Card className="border-blue-300 bg-blue-50">
+              <CardHeader>
+                <CardTitle className="flex items-center text-blue-800">
+                  <FileText className="w-5 h-5 mr-2" />
+                  Ready to Submit?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 mb-4">
+                  {decision
+                    ? 'Your use case has been evaluated. Review the decision details and submit for MRM review when ready.'
+                    : 'Generate a decision first to evaluate risk tier and required artifacts, then submit for MRM review.'}
+                </p>
+                <div className="flex items-center gap-3">
+                  {!decision ? (
+                    <Button onClick={generateDecision} disabled={generating}>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      {generating ? 'Generating...' : 'Generate Decision'}
+                    </Button>
+                  ) : (
+                    <Button onClick={resubmitForReview} disabled={resubmitting}>
+                      <Send className="w-4 h-4 mr-2" />
+                      {resubmitting ? 'Submitting...' : 'Submit for Review'}
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Sent Back Feedback Banner with Artifact Upload */}
         {isSentBack && (
           <div className="mb-6 space-y-4">
@@ -647,19 +683,19 @@ export default function OwnerUseCaseDetailPage() {
                     <CardTitle className="text-base">Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    {isSentBack && (
+                    {canSubmit && (
                       <Button
                         className="w-full"
                         onClick={resubmitForReview}
-                        disabled={resubmitting}
+                        disabled={resubmitting || !decision}
                       >
                         <Send className="w-4 h-4 mr-2" />
-                        {resubmitting ? 'Resubmitting...' : 'Resubmit for Review'}
+                        {resubmitting ? 'Submitting...' : isDraft ? 'Submit for Review' : 'Resubmit for Review'}
                       </Button>
                     )}
                     <Button
                       className="w-full"
-                      variant={isSentBack ? 'outline' : 'default'}
+                      variant={canSubmit ? 'outline' : 'default'}
                       onClick={generateDecision}
                       disabled={generating}
                     >
