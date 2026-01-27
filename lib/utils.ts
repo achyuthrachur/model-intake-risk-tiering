@@ -90,7 +90,33 @@ export function parseJsonSafe<T>(json: string | null | undefined, fallback: T): 
 
 export type ValidationStatus = 'overdue' | 'upcoming' | 'current';
 
+// Configurable validation frequencies - can be overridden by policy updates
+let validationFrequencyOverrides: Record<string, number> | null = null;
+
+// Default validation frequencies (in months)
+const DEFAULT_VALIDATION_FREQUENCIES: Record<string, number> = {
+  T3: 12,  // Annual
+  T2: 24,  // Bi-annual
+  T1: 36,  // Tri-annual
+};
+
+export function setValidationFrequencies(frequencies: Record<string, number>): void {
+  validationFrequencyOverrides = frequencies;
+}
+
+export function getValidationFrequencies(): Record<string, number> {
+  return validationFrequencyOverrides || DEFAULT_VALIDATION_FREQUENCIES;
+}
+
+export function resetValidationFrequencies(): void {
+  validationFrequencyOverrides = null;
+}
+
 export function getValidationFrequency(tier: string): number {
+  if (validationFrequencyOverrides && validationFrequencyOverrides[tier] !== undefined) {
+    return validationFrequencyOverrides[tier];
+  }
+
   switch (tier) {
     case 'T3': return 12;  // Annual
     case 'T2': return 24;  // Bi-annual

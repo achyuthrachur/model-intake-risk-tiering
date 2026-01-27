@@ -14,7 +14,6 @@ import {
   AlertTriangle,
   CheckCircle,
   Settings,
-  RefreshCw,
   MessageSquare,
   Lightbulb,
 } from 'lucide-react';
@@ -84,22 +83,6 @@ export default function Dashboard() {
     return matchesSearch && matchesStatus && matchesTier;
   });
 
-  const seedDemoData = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/admin/seed', { method: 'POST' });
-      if (!response.ok) {
-        const error = await response.json();
-        console.error('Seed API error:', error);
-        return;
-      }
-      await fetchUseCases();
-    } catch (error) {
-      console.error('Failed to seed demo data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -121,10 +104,6 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" onClick={seedDemoData}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Load Demo Data
-              </Button>
               <Link href="/admin">
                 <Button variant="outline" size="sm">
                   <Settings className="w-4 h-4 mr-2" />
@@ -367,9 +346,6 @@ export default function Dashboard() {
                   Get started by creating a new intake or loading demo data.
                 </p>
                 <div className="flex justify-center gap-3">
-                  <Button variant="outline" onClick={seedDemoData}>
-                    Load Demo Data
-                  </Button>
                   <Link href="/intake/chat">
                     <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
                       <MessageSquare className="w-4 h-4 mr-2" />

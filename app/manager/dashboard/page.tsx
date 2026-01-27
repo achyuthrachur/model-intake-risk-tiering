@@ -12,14 +12,11 @@ import {
   Clock,
   AlertTriangle,
   CheckCircle,
-  RefreshCw,
   ArrowLeft,
   Inbox,
   Eye,
   Settings,
   TrendingUp,
-  Download,
-  FileSpreadsheet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,7 +32,6 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDate, getTierBadgeColor, getStatusColor, truncate } from '@/lib/utils';
 import type { UseCaseWithRelations } from '@/lib/types';
-import { useToast } from '@/components/ui/use-toast';
 import { HelpTooltip, HelpCard } from '@/components/ui/help-tooltip';
 
 interface DashboardStats {
@@ -48,7 +44,6 @@ interface DashboardStats {
 
 export default function ManagerDashboard() {
   const router = useRouter();
-  const { toast } = useToast();
   const [useCases, setUseCases] = useState<UseCaseWithRelations[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -86,26 +81,6 @@ export default function ManagerDashboard() {
       });
     } catch (error) {
       console.error('Failed to fetch use cases:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const seedDemoData = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/admin/seed', { method: 'POST' });
-      if (!response.ok) {
-        const error = await response.json();
-        console.error('Seed API error:', error);
-        toast({ title: 'Error', description: 'Failed to load demo data', variant: 'destructive' });
-        return;
-      }
-      toast({ title: 'Success', description: 'Demo data loaded successfully' });
-      await fetchUseCases();
-    } catch (error) {
-      console.error('Failed to seed demo data:', error);
-      toast({ title: 'Error', description: 'Failed to load demo data', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -169,10 +144,6 @@ export default function ManagerDashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" onClick={seedDemoData}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Load Demo Data
-              </Button>
               <Link href="/manager/reports">
                 <Button variant="outline" size="sm" className="border-purple-300 text-purple-700 hover:bg-purple-50">
                   <TrendingUp className="w-4 h-4 mr-2" />
@@ -389,12 +360,13 @@ export default function ManagerDashboard() {
                   No intakes to review
                 </h3>
                 <p className="text-gray-500 mb-4">
-                  Submitted intakes will appear here for your review.
+                  Load demo data from the Manager Welcome page, or submitted intakes will appear here for your review.
                 </p>
-                <Button variant="outline" onClick={seedDemoData}>
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Load Demo Data
-                </Button>
+                <Link href="/manager/welcome">
+                  <Button>
+                    Go to Welcome Page
+                  </Button>
+                </Link>
               </div>
             ) : (
               <div className="overflow-x-auto">

@@ -2,9 +2,11 @@ import yaml from 'js-yaml';
 import fs from 'fs';
 import path from 'path';
 import type { RulesConfig, ArtifactsConfig } from './types';
+import { setValidationFrequencies, resetValidationFrequencies } from './utils';
 
 let cachedRulesConfig: RulesConfig | null = null;
 let cachedArtifactsConfig: ArtifactsConfig | null = null;
+let cachedValidationFrequencies: Record<string, number> | null = null;
 
 export function loadRulesConfig(): RulesConfig {
   if (cachedRulesConfig) {
@@ -28,9 +30,90 @@ export function loadArtifactsConfig(): ArtifactsConfig {
   return cachedArtifactsConfig;
 }
 
+// Load synthetic policy content
+export function loadSyntheticPolicy(policyType: 'current' | 'updated'): string {
+  const filename = policyType === 'current' ? 'current-policy.md' : 'updated-policy.md';
+  const policyPath = path.join(process.cwd(), 'config', 'synthetic-policies', filename);
+  return fs.readFileSync(policyPath, 'utf8');
+}
+
+// List available synthetic policies
+export function listSyntheticPolicies(): Array<{ id: string; name: string; description: string }> {
+  return [
+    {
+      id: 'current',
+      name: 'Current Policy (v1.0)',
+      description: 'Current active policy matching existing tiering rules (T3=12mo, T2=24mo, T1=36mo)'
+    },
+    {
+      id: 'updated',
+      name: 'Updated Policy (v2.0)',
+      description: 'Enhanced policy with stricter validation frequencies (T3=6mo, T2=12mo, T1=24mo) and new T3 elevation rules'
+    }
+  ];
+}
+
+// Load validation frequencies - checks database first, falls back to defaults
+export async function loadValidationFrequenciesAsync(): Promise<Record<string, number>> {
+  if (cachedValidationFrequencies) {
+    return cachedValidationFrequencies;
+  }
+
+  // Try to load from database
+  try {
+    const { default: prisma } = await import('./db');
+    const dbConfig = await prisma.activeConfiguration.findUnique({
+      where: { configType: 'validationFrequency' },
+    });
+
+    if (dbConfig) {
+      cachedValidationFrequencies = JSON.parse(dbConfig.configData);
+      setValidationFrequencies(cachedValidationFrequencies);
+      return cachedValidationFrequencies;
+    }
+  } catch (error) {
+    // Database not available or error, fall back to defaults
+    console.log('Using default validation frequencies (database not available or no override set)');
+  }
+
+  // Return defaults
+  cachedValidationFrequencies = { T3: 12, T2: 24, T1: 36 };
+  return cachedValidationFrequencies;
+}
+
+// Save validation frequencies to database
+export async function saveValidationFrequencies(
+  frequencies: Record<string, number>,
+  policyVersionId?: string,
+  updatedBy: string = 'system'
+): Promise<void> {
+  const { default: prisma } = await import('./db');
+
+  await prisma.activeConfiguration.upsert({
+    where: { configType: 'validationFrequency' },
+    update: {
+      configData: JSON.stringify(frequencies),
+      policyVersionId,
+      updatedBy,
+    },
+    create: {
+      configType: 'validationFrequency',
+      configData: JSON.stringify(frequencies),
+      policyVersionId,
+      updatedBy,
+    },
+  });
+
+  // Update cache and runtime config
+  cachedValidationFrequencies = frequencies;
+  setValidationFrequencies(frequencies);
+}
+
 export function reloadConfigs(): void {
   cachedRulesConfig = null;
   cachedArtifactsConfig = null;
+  cachedValidationFrequencies = null;
+  resetValidationFrequencies();
   loadRulesConfig();
   loadArtifactsConfig();
 }

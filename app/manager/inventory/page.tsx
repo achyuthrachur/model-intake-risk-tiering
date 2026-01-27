@@ -39,21 +39,6 @@ export default function InventoryDashboardPage() {
   const [tierFilter, setTierFilter] = useState<string>('all');
   const [validationStatusFilter, setValidationStatusFilter] = useState<string>('all');
   const [showChatbot, setShowChatbot] = useState(false);
-  const [seedingData, setSeedingData] = useState(false);
-
-  const seedDemoData = async () => {
-    setSeedingData(true);
-    try {
-      const response = await fetch('/api/admin/seed-inventory', { method: 'POST' });
-      if (response.ok) {
-        await fetchData();
-      }
-    } catch (error) {
-      console.error('Failed to seed demo data:', error);
-    } finally {
-      setSeedingData(false);
-    }
-  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -113,20 +98,14 @@ export default function InventoryDashboardPage() {
                 <h1 className="text-xl font-semibold text-gray-900">Model Inventory</h1>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowChatbot(!showChatbot)}
-              >
-                <MessageSquare className="w-4 h-4 mr-2" />
-                AI Assistant
-              </Button>
-              <Button variant="outline" size="sm" onClick={seedDemoData} disabled={seedingData}>
-                <RefreshCw className={`w-4 h-4 mr-2 ${seedingData ? 'animate-spin' : ''}`} />
-                {seedingData ? 'Loading...' : 'Load Demo Data'}
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowChatbot(!showChatbot)}
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
+              AI Assistant
+            </Button>
           </div>
         </div>
       </header>
@@ -211,13 +190,14 @@ export default function InventoryDashboardPage() {
               <p className="text-gray-500 mb-4">
                 {search || tierFilter !== 'all' || validationStatusFilter !== 'all'
                   ? 'No models match your filters. Try adjusting your search criteria.'
-                  : 'Approve use cases to add them to the model inventory.'}
+                  : 'Load demo data from the Manager Welcome page, or approve use cases to add them to the model inventory.'}
               </p>
               {!search && tierFilter === 'all' && validationStatusFilter === 'all' && (
-                <Button onClick={() => fetch('/api/admin/seed-inventory', { method: 'POST' }).then(() => fetchData())}>
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Load Demo Data
-                </Button>
+                <Link href="/manager/welcome">
+                  <Button>
+                    Go to Welcome Page
+                  </Button>
+                </Link>
               )}
             </div>
           ) : (

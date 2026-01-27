@@ -35,7 +35,44 @@ export async function GET(
       }
     }
 
-    return NextResponse.json({ message: 'No artifact review available' }, { status: 404 });
+    // If no cached review but we have a decision, generate a basic review on-the-fly
+    if (useCase.decision) {
+      const requiredArtifacts: string[] = JSON.parse(useCase.decision.requiredArtifacts || '[]');
+
+      // Build artifact status
+      const artifactStatus: Record<string, { required: boolean; uploaded: boolean; filename?: string }> = {};
+      for (const artifactId of requiredArtifacts) {
+        const attachment = useCase.attachments.find(a => a.artifactId === artifactId);
+        artifactStatus[artifactId] = {
+          required: true,
+          uploaded: !!attachment,
+          filename: attachment?.filename,
+        };
+      }
+
+      const completedCount = Object.values(artifactStatus).filter(a => a.uploaded).length;
+      const totalRequired = requiredArtifacts.length;
+
+      const basicReview = {
+        summary: totalRequired === 0
+          ? 'No artifacts are required for this use case.'
+          : completedCount === totalRequired
+            ? `All ${totalRequired} required artifacts have been uploaded and are ready for review.`
+            : `${completedCount} of ${totalRequired} required artifacts have been uploaded. ${totalRequired - completedCount} artifact(s) still pending.`,
+        completionPercentage: totalRequired > 0 ? Math.round((completedCount / totalRequired) * 100) : 100,
+        artifactStatus,
+        recommendations: completedCount < totalRequired
+          ? ['Please ensure all required artifacts are uploaded before approval.']
+          : ['All required artifacts have been uploaded.'],
+        readyForApproval: completedCount === totalRequired,
+        generatedAt: new Date().toISOString(),
+        aiPowered: false,
+      };
+
+      return NextResponse.json(basicReview);
+    }
+
+    return NextResponse.json({ message: 'No decision generated yet' }, { status: 404 });
   } catch (error) {
     console.error('Error fetching artifact review:', error);
     return NextResponse.json(
@@ -106,7 +143,11 @@ export async function POST(
       const totalRequired = requiredArtifacts.length;
 
       const basicReview = {
-        summary: `${completedCount} of ${totalRequired} required artifacts have been uploaded.`,
+        summary: totalRequired === 0
+          ? 'No artifacts are required for this use case.'
+          : completedCount === totalRequired
+            ? `All ${totalRequired} required artifacts have been uploaded and are ready for review.`
+            : `${completedCount} of ${totalRequired} required artifacts have been uploaded. ${totalRequired - completedCount} artifact(s) still pending.`,
         completionPercentage: totalRequired > 0 ? Math.round((completedCount / totalRequired) * 100) : 100,
         artifactStatus,
         recommendations: completedCount < totalRequired
@@ -116,6 +157,24 @@ export async function POST(
         generatedAt: new Date().toISOString(),
         aiPowered: false,
       };
+
+      // Cache the basic review too
+      let existingInsights = {};
+      try {
+        existingInsights = useCase.decision.aiInsights ? JSON.parse(useCase.decision.aiInsights) : {};
+      } catch {
+        existingInsights = {};
+      }
+
+      await prisma.decision.update({
+        where: { id: useCase.decision.id },
+        data: {
+          aiInsights: JSON.stringify({
+            ...existingInsights,
+            artifactReview: basicReview,
+          }),
+        },
+      });
 
       return NextResponse.json(basicReview);
     }

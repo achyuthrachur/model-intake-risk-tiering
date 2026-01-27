@@ -186,3 +186,45 @@ model ValidationFinding {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 }
+
+// =============================================
+// POLICY MANAGEMENT
+// =============================================
+
+model PolicyVersion {
+  id               String    @id @default(uuid())
+  name             String
+  description      String?
+  documentContent  String?   // Full policy text content
+
+  // Extracted configuration from AI analysis
+  extractedRules   String?   // JSON: extracted tiering rules
+  validationFreqs  String?   // JSON: { T1: 36, T2: 24, T3: 12 }
+  artifactReqs     String?   // JSON: artifact requirement changes
+
+  // Analysis & comparison
+  analysisResult   String?   // JSON: full AI analysis result
+  changesSummary   String?   // JSON: diff between current and new config
+
+  // Status tracking
+  status           String    @default("Draft") // Draft / Analyzed / Approved / Applied / Archived
+
+  // Audit fields
+  createdBy        String
+  createdAt        DateTime  @default(now())
+  analyzedAt       DateTime?
+  approvedBy       String?
+  approvedAt       DateTime?
+  appliedAt        DateTime?
+
+  updatedAt        DateTime  @updatedAt
+}
+
+model ActiveConfiguration {
+  id              String   @id @default(uuid())
+  configType      String   @unique // "validationFrequency", "rules", "artifacts"
+  configData      String   // JSON configuration data
+  policyVersionId String?  // Reference to PolicyVersion that set this config
+  updatedAt       DateTime @updatedAt
+  updatedBy       String
+}
