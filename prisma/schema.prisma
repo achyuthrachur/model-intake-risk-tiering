@@ -13,7 +13,7 @@ model UseCase {
   title                   String
   businessLine            String
   description             String
-  aiType                  String       // Traditional ML / GenAI / Rules / Hybrid
+  aiType                  String       // Model Type: Traditional ML / GenAI / Rules / Hybrid
   usageType               String       // Decisioning / Advisory / Automation
   humanInLoop             String       // Required / Optional / None
   customerImpact          String       // Direct / Indirect / None
@@ -86,6 +86,7 @@ model Attachment {
   useCase     UseCase  @relation(fields: [useCaseId], references: [id], onDelete: Cascade)
   filename    String
   type        String   // Business one-pager / Architecture diagram / Vendor doc / Data dictionary
+  artifactId  String?  // Links to artifact from config (e.g., "ValidationPlan", "ModelCard")
   storagePath String
   fileSize    Int?
   mimeType    String?

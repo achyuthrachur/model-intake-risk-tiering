@@ -54,7 +54,7 @@ export default function ChatIntakePage() {
       {
         id: 'welcome',
         role: 'assistant',
-        content: `Hi! I'm here to help you register a new model or automation use case for governance review. This covers AI/ML models, traditional models, RPA, and other automated decision systems.
+        content: `Hi! I'm here to help you register a new model or automation use case for governance review. This covers all types of models including traditional statistical models, machine learning, GenAI, RPA, and other automated decision systems.
 
 This will just take a few minutes. Let's start with the basics - what's the name of your use case, and can you briefly describe what it does?`,
       },
@@ -88,6 +88,35 @@ This will just take a few minutes. Let's start with the basics - what's the name
     [append]
   );
 
+  const handleOptionSelect = useCallback(
+    (field: string, value: string | string[]) => {
+      // Convert "Yes"/"No" to boolean for boolean fields
+      const booleanFields = [
+        'vendorInvolved', 'modelDefinitionTrigger', 'explainabilityRequired',
+        'retraining', 'overridesAllowed', 'fallbackPlanDefined', 'containsPii',
+        'containsNpi', 'sensitiveAttributesUsed', 'retentionPolicyDefined',
+        'loggingRequired', 'accessControlsDefined'
+      ];
+
+      let processedValue: string | string[] | boolean = value;
+      if (booleanFields.includes(field) && typeof value === 'string') {
+        processedValue = value === 'Yes';
+      }
+
+      // Update collected data
+      setCollectedData((prev) => ({ ...prev, [field]: processedValue }));
+
+      // Send the selection as a user message
+      const displayValue = Array.isArray(value) ? value.join(', ') : value;
+      setAiError(null);
+      append({
+        role: 'user',
+        content: displayValue,
+      });
+    },
+    [append]
+  );
+
   const handleStartOver = useCallback(() => {
     setCollectedData({});
     setIsComplete(false);
@@ -96,7 +125,7 @@ This will just take a few minutes. Let's start with the basics - what's the name
       {
         id: 'welcome',
         role: 'assistant',
-        content: `Hi! I'm here to help you register a new model or automation use case for governance review. This covers AI/ML models, traditional models, RPA, and other automated decision systems.
+        content: `Hi! I'm here to help you register a new model or automation use case for governance review. This covers all types of models including traditional statistical models, machine learning, GenAI, RPA, and other automated decision systems.
 
 This will just take a few minutes. Let's start with the basics - what's the name of your use case, and can you briefly describe what it does?`,
       },
@@ -201,6 +230,7 @@ This will just take a few minutes. Let's start with the basics - what's the name
           onSendMessage={handleSendMessage}
           onSubmit={handleSubmitUseCase}
           onStartOver={handleStartOver}
+          onOptionSelect={handleOptionSelect}
           error={aiError}
         />
       </div>

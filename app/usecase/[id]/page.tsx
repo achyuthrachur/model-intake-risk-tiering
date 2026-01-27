@@ -36,6 +36,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
 import { HelpTooltip, HelpCard } from '@/components/ui/help-tooltip';
 import {
+  cn,
   formatDate,
   formatDateTime,
   getTierBadgeColor,
@@ -43,6 +44,8 @@ import {
   parseJsonSafe,
 } from '@/lib/utils';
 import type { UseCaseWithRelations, DecisionResult } from '@/lib/types';
+import { ArtifactUploadCard } from '@/components/artifacts/ArtifactUploadCard';
+import { ProvidedArtifactsList } from '@/components/artifacts/ProvidedArtifactsList';
 
 export default function UseCaseDetailPage() {
   const params = useParams();
@@ -54,13 +57,28 @@ export default function UseCaseDetailPage() {
   const [artifactsConfig, setArtifactsConfig] = useState<any>(null);
   const [aiInsights, setAiInsights] = useState<any>(null);
   const [generatingAI, setGeneratingAI] = useState(false);
+  const [expandedEvidence, setExpandedEvidence] = useState<string | null>(null);
+  const [attachments, setAttachments] = useState<any[]>([]);
 
   const id = params.id as string;
 
   useEffect(() => {
     fetchUseCase();
     fetchConfig();
+    fetchAttachments();
   }, [id]);
+
+  const fetchAttachments = async () => {
+    try {
+      const response = await fetch(`/api/usecases/${id}/attachments`);
+      if (response.ok) {
+        const data = await response.json();
+        setAttachments(data);
+      }
+    } catch (error) {
+      console.log('Failed to fetch attachments');
+    }
+  };
 
   // Fetch existing AI insights when use case loads
   useEffect(() => {
@@ -851,6 +869,25 @@ export default function UseCaseDetailPage() {
                   }
                 />
 
+                {/* Provided Artifacts Summary */}
+                {attachments.length > 0 && (
+                  <ProvidedArtifactsList
+                    attachments={attachments}
+                    artifactsConfig={artifactsConfig?.artifacts}
+                    useCaseId={id}
+                    onDelete={async (attachmentId) => {
+                      const response = await fetch(
+                        `/api/usecases/${id}/attachments/${attachmentId}`,
+                        { method: 'DELETE' }
+                      );
+                      if (response.ok) {
+                        setAttachments((prev) => prev.filter((a) => a.id !== attachmentId));
+                        toast({ title: 'File deleted' });
+                      }
+                    }}
+                  />
+                )}
+
                 {/* Missing Evidence Alert */}
                 {missingEvidence.length > 0 && (
                   <Card className="border-amber-200 bg-amber-50">
@@ -866,12 +903,27 @@ export default function UseCaseDetailPage() {
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-1">
-                        {missingEvidence.map((id: string) => {
-                          const artifact = artifactsConfig?.artifacts[id];
+                        {missingEvidence.map((evidenceId: string) => {
+                          const artifact = artifactsConfig?.artifacts[evidenceId];
+                          const isExpanded = expandedEvidence === evidenceId;
                           return (
-                            <li key={id} className="flex items-center text-amber-800">
-                              <ChevronRight className="w-4 h-4 mr-1" />
-                              {artifact?.name || id}
+                            <li
+                              key={evidenceId}
+                              className="cursor-pointer hover:bg-amber-100 rounded p-1 -ml-1 transition-colors"
+                              onClick={() => setExpandedEvidence(isExpanded ? null : evidenceId)}
+                            >
+                              <div className="flex items-center text-amber-800">
+                                <ChevronRight className={cn(
+                                  "w-4 h-4 mr-1 transition-transform",
+                                  isExpanded && "rotate-90"
+                                )} />
+                                {artifact?.name || evidenceId}
+                              </div>
+                              {isExpanded && artifact?.description && (
+                                <p className="text-sm text-amber-700 mt-1 ml-5">
+                                  {artifact.description}
+                                </p>
+                              )}
                             </li>
                           );
                         })}
@@ -892,43 +944,21 @@ export default function UseCaseDetailPage() {
                     <CardContent>
                       <div className="space-y-3">
                         {artifacts.map((artifact: any) => (
-                          <div
+                          <ArtifactUploadCard
                             key={artifact.id}
-                            className={`p-4 rounded-lg border ${
-                              artifact.isMissing ? 'bg-amber-50 border-amber-200' : 'bg-gray-50'
-                            }`}
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start">
-                                {artifact.isMissing ? (
-                                  <AlertCircle className="w-5 h-5 text-amber-500 mr-3 mt-0.5" />
-                                ) : (
-                                  <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5" />
-                                )}
-                                <div>
-                                  <h4 className="font-medium inline-flex items-center gap-1.5">
-                                    {artifact.name}
-                                    {artifact.whatGoodLooksLike && (
-                                      <HelpTooltip
-                                        title="What Good Looks Like"
-                                        content={artifact.whatGoodLooksLike}
-                                      />
-                                    )}
-                                  </h4>
-                                  <p className="text-sm text-gray-600 mt-1">{artifact.description}</p>
-                                  <p className="text-xs text-gray-500 mt-2 inline-flex items-center gap-1">
-                                    Owner: {artifact.ownerRole}
-                                    <HelpTooltip content={`The ${artifact.ownerRole} team is responsible for providing this documentation.`} />
-                                  </p>
-                                </div>
-                              </div>
-                              {artifact.isMissing && (
-                                <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-200">
-                                  Missing
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
+                            artifact={artifact}
+                            isMissing={artifact.isMissing}
+                            useCaseId={id}
+                            existingAttachments={attachments}
+                            onUploadComplete={(newAttachment) => {
+                              setAttachments((prev) => [newAttachment, ...prev]);
+                            }}
+                            onDeleteComplete={(attachmentId) => {
+                              setAttachments((prev) =>
+                                prev.filter((a) => a.id !== attachmentId)
+                              );
+                            }}
+                          />
                         ))}
                       </div>
                     </CardContent>

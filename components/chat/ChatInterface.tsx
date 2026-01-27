@@ -18,6 +18,7 @@ interface ChatInterfaceProps {
   onSendMessage: (message: string) => void;
   onSubmit: () => void;
   onStartOver: () => void;
+  onOptionSelect?: (field: string, value: string | string[]) => void;
   error?: string | null;
 }
 
@@ -28,6 +29,7 @@ export function ChatInterface({
   onSendMessage,
   onSubmit,
   onStartOver,
+  onOptionSelect,
   error,
 }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -51,9 +53,23 @@ export function ChatInterface({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message, index) => (
-          <ChatMessage key={index} message={message} />
-        ))}
+        {messages.map((message, index) => {
+          // Find the index of the last assistant message
+          const lastAssistantIndex = messages.reduce(
+            (lastIdx, m, idx) => m.role === 'assistant' ? idx : lastIdx,
+            -1
+          );
+          const isLatestAssistant = message.role === 'assistant' && index === lastAssistantIndex;
+
+          return (
+            <ChatMessage
+              key={index}
+              message={message}
+              onOptionSelect={onOptionSelect}
+              isLatestAssistant={isLatestAssistant}
+            />
+          );
+        })}
 
         {isLoading && (
           <div className="flex items-center gap-2 p-4 bg-gray-50 rounded-lg">

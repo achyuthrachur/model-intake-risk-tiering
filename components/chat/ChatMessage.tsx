@@ -2,16 +2,30 @@
 
 import { cn } from '@/lib/utils';
 import { Bot, User } from 'lucide-react';
+import { parseMessageForInteractiveElements, stripInteractiveMarkup } from '@/lib/chat/parseInteractiveElements';
+import { InteractiveOptions } from './InteractiveOptions';
 
 interface ChatMessageProps {
   message: {
     role: 'user' | 'assistant';
     content: string;
   };
+  onOptionSelect?: (field: string, value: string | string[]) => void;
+  isLatestAssistant?: boolean;
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({ message, onOptionSelect, isLatestAssistant }: ChatMessageProps) {
   const isUser = message.role === 'user';
+
+  // Parse for interactive elements (only for assistant messages)
+  const parsed = !isUser
+    ? parseMessageForInteractiveElements(message.content)
+    : null;
+
+  // Strip JSON blocks from display content
+  const displayContent = isUser
+    ? message.content
+    : stripJsonBlocks(parsed?.textBefore || message.content);
 
   return (
     <div
@@ -37,9 +51,34 @@ export function ChatMessage({ message }: ChatMessageProps) {
           {isUser ? 'You' : 'AI Assistant'}
         </p>
         <div className="text-sm text-gray-700 whitespace-pre-wrap">
-          {message.content}
+          {displayContent}
         </div>
+
+        {/* Render interactive options if present and this is the latest assistant message */}
+        {parsed?.interactiveElement && isLatestAssistant && onOptionSelect && (
+          <InteractiveOptions
+            type={parsed.interactiveElement.type}
+            field={parsed.interactiveElement.field}
+            options={parsed.interactiveElement.options}
+            onSelect={onOptionSelect}
+          />
+        )}
+
+        {/* Show text after options if any */}
+        {parsed?.textAfter && (
+          <div className="text-sm text-gray-700 whitespace-pre-wrap mt-2">
+            {stripJsonBlocks(parsed.textAfter)}
+          </div>
+        )}
       </div>
     </div>
   );
+}
+
+// Helper to strip JSON code blocks from message display
+function stripJsonBlocks(content: string): string {
+  return content
+    .replace(/```json\s*[\s\S]*?```/g, '')
+    .replace(/\{[^{}]*"extracted"[^{}]*\}/g, '')
+    .trim();
 }
