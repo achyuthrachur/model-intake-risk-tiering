@@ -61,6 +61,7 @@ model UseCase {
   decision                Decision?
   attachments             Attachment[]
   auditEvents             AuditEvent[]
+  inventoryModel          InventoryModel?
 }
 
 model Decision {
@@ -102,4 +103,86 @@ model AuditEvent {
   details     String?  // JSON details
   diffSummary String?
   timestamp   DateTime @default(now())
+}
+
+// =============================================
+// MODEL INVENTORY MANAGEMENT
+// =============================================
+
+model InventoryModel {
+  id                        String       @id @default(uuid())
+  useCaseId                 String       @unique
+  useCase                   UseCase      @relation(fields: [useCaseId], references: [id], onDelete: Cascade)
+
+  inventoryNumber           String       @unique  // e.g., "MDL-2024-001"
+  addedToInventoryAt        DateTime     @default(now())
+  addedBy                   String
+
+  // Classification (copied from Decision at approval time)
+  tier                      String       // T1 / T2 / T3
+  validationFrequencyMonths Int          // 12=T3, 24=T2, 36=T1
+
+  // Production tracking
+  productionDate            DateTime?
+  validatedBeforeProduction Boolean      @default(false)
+  lastValidationDate        DateTime?
+  nextValidationDue         DateTime
+
+  // Status
+  status                    String       @default("Active") // Active / Retired / Suspended
+
+  createdAt                 DateTime     @default(now())
+  updatedAt                 DateTime     @updatedAt
+
+  validations               Validation[]
+}
+
+model Validation {
+  id                 String              @id @default(uuid())
+  inventoryModelId   String
+  inventoryModel     InventoryModel      @relation(fields: [inventoryModelId], references: [id], onDelete: Cascade)
+
+  validationType     String              // Initial / Periodic / Triggered
+  validationDate     DateTime
+  validatedBy        String
+  status             String              @default("Completed") // In Progress / Completed / Cancelled
+  overallResult      String?             // Satisfactory / Satisfactory with Findings / Unsatisfactory
+  summaryNotes       String?
+
+  // Report artifact
+  reportFilename     String?
+  reportStoragePath  String?
+
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  findings           ValidationFinding[]
+}
+
+model ValidationFinding {
+  id                 String     @id @default(uuid())
+  validationId       String
+  validation         Validation @relation(fields: [validationId], references: [id], onDelete: Cascade)
+
+  findingNumber      String     // F-001, F-002
+  title              String
+  description        String
+  severity           String     // Critical / High / Medium / Low
+  category           String?    // Performance / Documentation / Controls / Data Quality
+
+  // Remediation
+  remediationStatus  String     @default("Open") // Open / In Progress / Remediated / Accepted
+  remediationNotes   String?
+  remediationDueDate DateTime?
+  remediatedAt       DateTime?
+  remediatedBy       String?
+
+  // MRM Sign-off
+  mrmSignedOff       Boolean    @default(false)
+  mrmSignOffDate     DateTime?
+  mrmSignOffBy       String?
+  mrmSignOffNotes    String?
+
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
 }

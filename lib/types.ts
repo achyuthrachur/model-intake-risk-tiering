@@ -257,3 +257,102 @@ export interface UseCaseWithRelations {
     timestamp: Date;
   }>;
 }
+
+// =============================================
+// INVENTORY MANAGEMENT TYPES
+// =============================================
+
+export type InventoryStatus = 'Active' | 'Retired' | 'Suspended';
+export type ValidationType = 'Initial' | 'Periodic' | 'Triggered' | 'Ad-hoc';
+export type ValidationResult = 'Satisfactory' | 'Satisfactory with Findings' | 'Unsatisfactory';
+export type ValidationStatusType = 'In Progress' | 'Completed' | 'Cancelled';
+export type FindingSeverity = 'Critical' | 'High' | 'Medium' | 'Low';
+export type FindingCategory = 'Performance' | 'Documentation' | 'Controls' | 'Data Quality' | 'Other';
+export type RemediationStatus = 'Open' | 'In Progress' | 'Remediated' | 'Accepted';
+
+export interface ValidationFindingData {
+  id: string;
+  validationId: string;
+  findingNumber: string;
+  title: string;
+  description: string;
+  severity: FindingSeverity;
+  category: FindingCategory | null;
+  remediationStatus: RemediationStatus;
+  remediationNotes: string | null;
+  remediationDueDate: Date | null;
+  remediatedAt: Date | null;
+  remediatedBy: string | null;
+  mrmSignedOff: boolean;
+  mrmSignOffDate: Date | null;
+  mrmSignOffBy: string | null;
+  mrmSignOffNotes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ValidationData {
+  id: string;
+  inventoryModelId: string;
+  validationType: ValidationType;
+  validationDate: Date;
+  validatedBy: string;
+  status: ValidationStatusType;
+  overallResult: ValidationResult | null;
+  summaryNotes: string | null;
+  reportFilename: string | null;
+  reportStoragePath: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  findings?: ValidationFindingData[];
+}
+
+export interface InventoryModelData {
+  id: string;
+  useCaseId: string;
+  inventoryNumber: string;
+  addedToInventoryAt: Date;
+  addedBy: string;
+  tier: Tier;
+  validationFrequencyMonths: number;
+  productionDate: Date | null;
+  validatedBeforeProduction: boolean;
+  lastValidationDate: Date | null;
+  nextValidationDue: Date;
+  status: InventoryStatus;
+  createdAt: Date;
+  updatedAt: Date;
+  useCase?: UseCaseWithRelations;
+  validations?: ValidationData[];
+}
+
+export interface InventoryModelWithDetails extends InventoryModelData {
+  useCase: UseCaseWithRelations;
+  validations: ValidationData[];
+  // Computed fields
+  validationStatus: 'overdue' | 'upcoming' | 'current';
+  openFindingsCount: number;
+  totalFindingsCount: number;
+}
+
+export interface InventoryStats {
+  totalModels: number;
+  byTier: {
+    T1: number;
+    T2: number;
+    T3: number;
+  };
+  byStatus: {
+    Active: number;
+    Retired: number;
+    Suspended: number;
+  };
+  validationStatus: {
+    overdue: number;
+    upcoming: number;
+    current: number;
+  };
+  openFindings: number;
+  aiEnabled: number;
+  vendorModels: number;
+}

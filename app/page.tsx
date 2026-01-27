@@ -160,7 +160,7 @@ export default function WelcomePage() {
               </Card>
             </Link>
 
-            <Link href="/manager/dashboard" className="block">
+            <Link href="/manager/welcome" className="block">
               <Card className="h-full hover:shadow-lg hover:border-purple-500/50 transition-all cursor-pointer group">
                 <CardContent className="p-6 text-center">
                   <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:bg-purple-200 transition-colors">
