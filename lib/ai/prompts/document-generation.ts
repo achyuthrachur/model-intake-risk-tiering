@@ -13,7 +13,7 @@ export function buildExecutiveSummaryPrompt(
 **Title:** ${useCase.title}
 **Business Line:** ${useCase.businessLine}
 **Description:** ${useCase.description}
-**AI Type:** ${useCase.aiType}
+**Model Type:** ${useCase.aiType}
 **Usage Type:** ${useCase.usageType}
 **Customer Impact:** ${useCase.customerImpact}
 
@@ -55,7 +55,7 @@ export function buildArtifactRecommendationPrompt(
 
 **Title:** ${useCase.title}
 **Business Line:** ${useCase.businessLine}
-**AI Type:** ${useCase.aiType}
+**Model Type:** ${useCase.aiType}
 **Usage Type:** ${useCase.usageType}
 **Risk Tier:** ${decision.tier}
 **Risk Flags:** ${decision.riskFlags.join(', ') || 'None'}
@@ -78,7 +78,7 @@ export function buildRiskGuidancePrompt(
 ## Use Case
 
 **Title:** ${useCase.title}
-**AI Type:** ${useCase.aiType}
+**Model Type:** ${useCase.aiType}
 **Usage Type:** ${useCase.usageType}
 **Deployment:** ${useCase.deployment}
 **Customer Impact:** ${useCase.customerImpact}

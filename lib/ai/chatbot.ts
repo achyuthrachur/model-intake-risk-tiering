@@ -26,7 +26,7 @@ export function createInitialChatState(): ChatState {
     messages: [
       {
         role: 'assistant',
-        content: `Hi! I'm here to help you register a new AI/ML use case for governance review. This will just take a few minutes.
+        content: `Hi! I'm here to help you register a new use case for governance review. This will just take a few minutes.
 
 Let's start with the basics. What's the **name** of your use case, and can you briefly describe what it does?`,
       },

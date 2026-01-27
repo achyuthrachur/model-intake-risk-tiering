@@ -169,7 +169,7 @@ async function generateAISummary(stats: Stats, useCases: any[]): Promise<string 
   try {
     if (!isAIEnabled()) return null;
 
-    const prompt = `You are a Model Risk Management executive summarizing the AI/ML model inventory for senior leadership.
+    const prompt = `You are a Model Risk Management executive summarizing the model inventory for senior leadership.
 
 Based on the following statistics, write a concise 2-3 paragraph executive summary highlighting:
 1. Current state of the model inventory
@@ -220,7 +220,7 @@ async function generateExecutiveSummaryDocx(
           new Paragraph({
             children: [
               new TextRun({
-                text: 'AI/ML Model Risk Management',
+                text: 'Model Risk Management',
                 bold: true,
                 size: 36,
               }),
@@ -260,7 +260,7 @@ async function generateExecutiveSummaryDocx(
               new TextRun({
                 text:
                   aiSummary ||
-                  `This report provides an overview of the organization's AI/ML model inventory as of ${new Date().toLocaleDateString()}. The inventory contains ${stats.total} use cases across ${Object.keys(stats.byBusinessLine).length} business lines. Currently, ${stats.pendingReview} items are pending MRM review, with ${stats.highRiskCount} classified as high-risk (Tier 3). Key focus areas include addressing ${stats.missingArtifactsTotal} missing artifacts and ensuring timely review of pending submissions.`,
+                  `This report provides an overview of the organization's model inventory as of ${new Date().toLocaleDateString()}. The inventory contains ${stats.total} use cases across ${Object.keys(stats.byBusinessLine).length} business lines. Currently, ${stats.pendingReview} items are pending MRM review, with ${stats.highRiskCount} classified as high-risk (Tier 3). Key focus areas include addressing ${stats.missingArtifactsTotal} missing artifacts and ensuring timely review of pending submissions.`,
               }),
             ],
             spacing: { after: 300 },
@@ -355,9 +355,9 @@ async function generateExecutiveSummaryDocx(
 
           new Paragraph({ spacing: { before: 300 } }),
 
-          // AI Type Distribution
-          createHeading('AI/ML Technology Distribution'),
-          createDistributionTable('AI Type', stats.byAiType),
+          // Model Type Distribution
+          createHeading('Model Technology Distribution'),
+          createDistributionTable('Model Type', stats.byAiType),
 
           // Footer
           new Paragraph({ spacing: { before: 600 } }),

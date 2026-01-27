@@ -30,7 +30,7 @@ export async function generateMemoDocx(
           new Paragraph({
             children: [
               new TextRun({
-                text: 'AI/ML Use Case Governance Review',
+                text: 'Model Use Case Governance Review',
                 bold: true,
                 size: 32,
               }),
@@ -89,7 +89,7 @@ export async function generateMemoDocx(
           }),
           new Paragraph({
             children: [
-              new TextRun({ text: 'AI/ML Type: ', bold: true }),
+              new TextRun({ text: 'Model Type: ', bold: true }),
               new TextRun({ text: useCase.aiType }),
             ],
             spacing: { after: 100 },
@@ -488,7 +488,7 @@ export function generateInventoryCsv(
     'ID',
     'Title',
     'Business Line',
-    'AI Type',
+    'Model Type',
     'Usage Type',
     'Customer Impact',
     'Human-in-Loop',

@@ -18,7 +18,7 @@ export default function WelcomePage() {
             </div>
             <div>
               <h1 className="text-xl font-semibold text-gray-900">
-                AI Use Case Governance
+                Model Use Case Governance
               </h1>
               <p className="text-sm text-gray-500">
                 Model Intake & Risk Tiering
@@ -36,10 +36,10 @@ export default function WelcomePage() {
               <Shield className="w-10 h-10 text-primary" />
             </div>
             <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-              AI Governance Made Simple
+              Model Governance Made Simple
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Streamline your AI/ML model intake process with automated risk tiering,
+              Streamline your model intake process with automated risk tiering,
               compliance tracking, and comprehensive governance workflows.
             </p>
           </div>
@@ -47,15 +47,15 @@ export default function WelcomePage() {
           {/* First Time User Help Card */}
           <HelpCard
             id="welcome-intro"
-            title="Welcome to AI Use Case Governance"
+            title="Welcome to Model Use Case Governance"
             icon={<Lightbulb className="w-5 h-5" />}
             variant="tip"
             className="mb-8 text-left max-w-2xl mx-auto"
             content={
               <div className="space-y-2">
-                <p>This platform helps your organization manage AI/ML model risk through:</p>
+                <p>This platform helps your organization manage model risk through:</p>
                 <ul className="list-disc list-inside space-y-1 ml-2">
-                  <li><strong>Intake:</strong> Submit new AI use cases for governance review</li>
+                  <li><strong>Intake:</strong> Submit new use cases for governance review</li>
                   <li><strong>Risk Assessment:</strong> Automatic tier assignment based on risk factors</li>
                   <li><strong>Artifact Tracking:</strong> Know exactly what documentation is required</li>
                   <li><strong>Audit Trail:</strong> Full history of all actions and decisions</li>
@@ -74,12 +74,12 @@ export default function WelcomePage() {
               <h3 className="font-semibold text-gray-900 mb-2 inline-flex items-center gap-1.5">
                 Smart Intake
                 <HelpTooltip
-                  title="AI-Powered Intake Process"
-                  content="Choose between a traditional form or an AI chatbot that guides you through questions conversationally. The chatbot adapts based on your answers and asks follow-up questions as needed."
+                  title="Intelligent Intake Process"
+                  content="Choose between a traditional form or a chatbot that guides you through questions conversationally. The chatbot adapts based on your answers and asks follow-up questions as needed."
                 />
               </h3>
               <p className="text-sm text-gray-600">
-                AI-powered conversational intake that guides users through the submission process.
+                Intelligent conversational intake that guides users through the submission process.
               </p>
             </div>
             <div className="bg-white rounded-xl p-6 shadow-sm border">
@@ -139,7 +139,7 @@ export default function WelcomePage() {
                         <div>
                           <p className="mb-2">As a Model Owner, you are responsible for:</p>
                           <ul className="list-disc list-inside space-y-1">
-                            <li>Submitting new AI/ML use cases</li>
+                            <li>Submitting new use cases</li>
                             <li>Providing required documentation</li>
                             <li>Responding to MRM feedback</li>
                             <li>Maintaining model documentation</li>
@@ -150,7 +150,7 @@ export default function WelcomePage() {
                     />
                   </h3>
                   <p className="text-sm text-gray-600 mb-4">
-                    Submit new AI/ML use cases for review, track your submissions, and respond to feedback.
+                    Submit new use cases for review, track your submissions, and respond to feedback.
                   </p>
                   <Button className="w-full group-hover:bg-primary/90">
                     Get Started
@@ -205,7 +205,7 @@ export default function WelcomePage() {
       <footer className="flex-shrink-0 border-t bg-white/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <p className="text-center text-sm text-gray-500">
-            Built for enterprise AI governance and model risk management
+            Built for enterprise model governance and model risk management
           </p>
         </div>
       </footer>

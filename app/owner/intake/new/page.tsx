@@ -29,7 +29,7 @@ import {
 const steps = [
   { id: 1, name: 'Overview', description: 'Basic information' },
   { id: 2, name: 'Use & Impact', description: 'Usage type and customer impact' },
-  { id: 3, name: 'AI/Model Details', description: 'Technical details' },
+  { id: 3, name: 'Model Details', description: 'Technical details' },
   { id: 4, name: 'Data & Privacy', description: 'Data handling' },
   { id: 5, name: 'Controls', description: 'Monitoring and controls' },
   { id: 6, name: 'Review', description: 'Review and submit' },
@@ -44,7 +44,7 @@ const defaultFormData: UseCaseFormData = {
   customerImpact: 'None',
   humanInLoop: 'Optional',
   downstreamDecisions: '',
-  aiType: 'Traditional ML',
+  modelType: 'Traditional ML',
   deployment: 'Internal tool',
   vendorInvolved: false,
   vendorName: '',
@@ -155,7 +155,7 @@ export default function OwnerNewIntakePage() {
       case 2:
         return formData.usageType && formData.customerImpact && formData.humanInLoop;
       case 3:
-        return formData.aiType && formData.deployment;
+        return formData.modelType && formData.deployment;
       default:
         return true;
     }
@@ -384,14 +384,14 @@ export default function OwnerNewIntakePage() {
                   </>
                 )}
 
-                {/* Step 3: AI/Model Details */}
+                {/* Step 3: Model Details */}
                 {currentStep === 3 && (
                   <>
                     <div className="space-y-3">
-                      <Label>AI/ML Type *</Label>
+                      <Label>Model Type *</Label>
                       <RadioGroup
-                        value={formData.aiType}
-                        onValueChange={(value) => updateForm('aiType', value)}
+                        value={formData.modelType}
+                        onValueChange={(value) => updateForm('modelType', value)}
                       >
                         <div className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50">
                           <RadioGroupItem value="Traditional ML" id="ml" />
@@ -696,10 +696,10 @@ export default function OwnerNewIntakePage() {
                       </div>
 
                       <div className="border rounded-lg p-4">
-                        <h5 className="font-medium text-gray-700 mb-2">AI/Model Details</h5>
+                        <h5 className="font-medium text-gray-700 mb-2">Model Details</h5>
                         <dl className="grid grid-cols-2 gap-2 text-sm">
-                          <dt className="text-gray-500">AI Type:</dt>
-                          <dd>{formData.aiType}</dd>
+                          <dt className="text-gray-500">Model Type:</dt>
+                          <dd>{formData.modelType}</dd>
                           <dt className="text-gray-500">Deployment:</dt>
                           <dd>{formData.deployment}</dd>
                           <dt className="text-gray-500">Vendor Involved:</dt>

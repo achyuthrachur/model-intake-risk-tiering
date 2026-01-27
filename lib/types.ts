@@ -1,6 +1,6 @@
 // Domain types for the Model Intake Risk Tiering application
 
-export type AIType = 'Traditional ML' | 'GenAI' | 'Rules' | 'Hybrid';
+export type ModelType = 'Traditional ML' | 'GenAI' | 'Rules' | 'Hybrid';
 export type UsageType = 'Decisioning' | 'Advisory' | 'Automation';
 export type HumanInLoop = 'Required' | 'Optional' | 'None';
 export type CustomerImpact = 'Direct' | 'Indirect' | 'None';
@@ -76,8 +76,8 @@ export interface UseCaseFormData {
   humanInLoop: HumanInLoop;
   downstreamDecisions?: string;
 
-  // AI / Model Details
-  aiType: AIType;
+  // Model Details
+  modelType: ModelType;
   deployment: Deployment;
   vendorInvolved: boolean;
   vendorName?: string;

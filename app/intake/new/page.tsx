@@ -30,7 +30,7 @@ import {
 const steps = [
   { id: 1, name: 'Overview', description: 'Basic information' },
   { id: 2, name: 'Use & Impact', description: 'Usage type and customer impact' },
-  { id: 3, name: 'AI/Model Details', description: 'Technical details' },
+  { id: 3, name: 'Model Details', description: 'Technical details' },
   { id: 4, name: 'Data & Privacy', description: 'Data handling' },
   { id: 5, name: 'Controls', description: 'Monitoring and controls' },
   { id: 6, name: 'Review', description: 'Review and submit' },
@@ -45,7 +45,7 @@ const defaultFormData: UseCaseFormData = {
   customerImpact: 'None',
   humanInLoop: 'Optional',
   downstreamDecisions: '',
-  aiType: 'Traditional ML',
+  modelType: 'Traditional ML',
   deployment: 'Internal tool',
   vendorInvolved: false,
   vendorName: '',
@@ -158,7 +158,7 @@ export default function NewIntakePage() {
       case 2:
         return formData.usageType && formData.customerImpact && formData.humanInLoop;
       case 3:
-        return formData.aiType && formData.deployment;
+        return formData.modelType && formData.deployment;
       default:
         return true;
     }
@@ -253,7 +253,7 @@ export default function NewIntakePage() {
                       title="Getting Started with Your Intake"
                       icon={<Lightbulb className="w-5 h-5" />}
                       variant="tip"
-                      content="Start by providing basic information about your AI/ML use case. Be specific in your description as this helps the risk assessment process."
+                      content="Start by providing basic information about your use case. Be specific in your description as this helps the risk assessment process."
                     />
 
                     <div className="space-y-2">
@@ -296,7 +296,7 @@ export default function NewIntakePage() {
                         Description *
                         <HelpTooltip
                           title="Use Case Description"
-                          content="Explain what this AI/ML system does, its business purpose, and expected outcomes. Include: what problem it solves, how it works at a high level, and what decisions or actions it enables."
+                          content="Explain what this system does, its business purpose, and expected outcomes. Include: what problem it solves, how it works at a high level, and what decisions or actions it enables."
                         />
                       </Label>
                       <Textarea
@@ -480,7 +480,7 @@ export default function NewIntakePage() {
                   <>
                     <HelpCard
                       id="intake-step3-help"
-                      title="AI/ML Type Determines Requirements"
+                      title="Model Type Determines Requirements"
                       icon={<Lightbulb className="w-5 h-5" />}
                       variant="info"
                       content="GenAI systems have additional requirements including hallucination testing, prompt injection security testing, and guardrails documentation. Traditional ML models focus on validation, backtesting, and performance monitoring."
@@ -488,7 +488,7 @@ export default function NewIntakePage() {
 
                     <div className="space-y-3">
                       <Label className="inline-flex items-center gap-1.5">
-                        AI/ML Type *
+                        Model Type *
                         <HelpTooltip
                           title="Technology Type"
                           content={
@@ -504,8 +504,8 @@ export default function NewIntakePage() {
                         />
                       </Label>
                       <RadioGroup
-                        value={formData.aiType}
-                        onValueChange={(value) => updateForm('aiType', value)}
+                        value={formData.modelType}
+                        onValueChange={(value) => updateForm('modelType', value)}
                       >
                         <div className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50">
                           <RadioGroupItem value="Traditional ML" id="ml" />
@@ -668,7 +668,7 @@ export default function NewIntakePage() {
                     <div className="space-y-4">
                       <h4 className="font-medium inline-flex items-center gap-1.5">
                         Data Sensitivity
-                        <HelpTooltip content="Indicate what types of sensitive data this AI system processes. This drives privacy and compliance requirements." />
+                        <HelpTooltip content="Indicate what types of sensitive data this system processes. This drives privacy and compliance requirements." />
                       </h4>
 
                       <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -823,7 +823,7 @@ export default function NewIntakePage() {
                       title="Ongoing Monitoring Requirements"
                       icon={<Lightbulb className="w-5 h-5" />}
                       variant="info"
-                      content="Even after approval, AI systems require ongoing monitoring to ensure they continue to perform as expected. The frequency and depth of monitoring depends on the risk tier."
+                      content="Even after approval, models require ongoing monitoring to ensure they continue to perform as expected. The frequency and depth of monitoring depends on the risk tier."
                     />
 
                     <div className="space-y-2">
@@ -926,10 +926,10 @@ export default function NewIntakePage() {
                       </div>
 
                       <div className="border rounded-lg p-4">
-                        <h5 className="font-medium text-gray-700 mb-2">AI/Model Details</h5>
+                        <h5 className="font-medium text-gray-700 mb-2">Model Details</h5>
                         <dl className="grid grid-cols-2 gap-2 text-sm">
-                          <dt className="text-gray-500">AI Type:</dt>
-                          <dd>{formData.aiType}</dd>
+                          <dt className="text-gray-500">Model Type:</dt>
+                          <dd>{formData.modelType}</dd>
                           <dt className="text-gray-500">Deployment:</dt>
                           <dd>{formData.deployment}</dd>
                           <dt className="text-gray-500">Vendor Involved:</dt>

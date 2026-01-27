@@ -113,7 +113,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-xl font-semibold text-gray-900">
-                  AI Use Case Governance
+                  Model Use Case Governance
                 </h1>
                 <p className="text-sm text-gray-500">
                   Model Intake & Risk Tiering
@@ -134,7 +134,7 @@ export default function Dashboard() {
               <Link href="/intake/chat">
                 <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
                   <MessageSquare className="w-4 h-4 mr-2" />
-                  AI Chat Intake
+                  Chat Intake
                 </Button>
               </Link>
               <Link href="/intake/new">
@@ -158,7 +158,7 @@ export default function Dashboard() {
           className="mb-6"
           content={
             <div className="space-y-2">
-              <p>This dashboard shows all AI/ML use cases in the governance pipeline.</p>
+              <p>This dashboard shows all use cases in the governance pipeline.</p>
               <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
                 <li><strong>Stats cards</strong> show counts by status and risk tier</li>
                 <li><strong>Filters</strong> let you narrow down by status or tier</li>
@@ -373,7 +373,7 @@ export default function Dashboard() {
                   <Link href="/intake/chat">
                     <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
                       <MessageSquare className="w-4 h-4 mr-2" />
-                      AI Chat Intake
+                      Chat Intake
                     </Button>
                   </Link>
                   <Link href="/intake/new">
@@ -391,7 +391,7 @@ export default function Dashboard() {
                     <tr>
                       <th>Title</th>
                       <th>Business Line</th>
-                      <th>AI Type</th>
+                      <th>Model Type</th>
                       <th>Tier</th>
                       <th>Status</th>
                       <th>Updated</th>

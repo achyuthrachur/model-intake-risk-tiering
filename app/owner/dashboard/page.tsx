@@ -115,7 +115,7 @@ export default function OwnerDashboard() {
                     Model Owner Dashboard
                   </h1>
                   <p className="text-sm text-gray-500">
-                    Submit and track your AI/ML use cases
+                    Submit and track your use cases
                   </p>
                 </div>
               </div>
@@ -124,7 +124,7 @@ export default function OwnerDashboard() {
               <Link href="/owner/intake/chat">
                 <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
                   <MessageSquare className="w-4 h-4 mr-2" />
-                  AI Chat Intake
+                  Chat Intake
                 </Button>
               </Link>
               <Link href="/owner/intake/new">
@@ -316,7 +316,7 @@ export default function OwnerDashboard() {
                   <Link href="/owner/intake/chat">
                     <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
                       <MessageSquare className="w-4 h-4 mr-2" />
-                      AI Chat Intake
+                      Chat Intake
                     </Button>
                   </Link>
                   <Link href="/owner/intake/new">
@@ -334,7 +334,7 @@ export default function OwnerDashboard() {
                     <tr>
                       <th>Title</th>
                       <th>Business Line</th>
-                      <th>AI Type</th>
+                      <th>Model Type</th>
                       <th>Tier</th>
                       <th>Status</th>
                       <th>Updated</th>

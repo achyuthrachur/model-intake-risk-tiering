@@ -20,14 +20,14 @@ export function buildRiskAssessmentPrompt(
     ? decision.missingEvidence.join(', ')
     : 'All required evidence provided';
 
-  return `You are an AI/ML model risk management expert at a financial institution with deep knowledge of:
+  return `You are a model risk management expert at a financial institution with deep knowledge of:
 - SR 11-7 (OCC Guidance on Model Risk Management)
 - Fair lending regulations (ECOA, Fair Housing Act)
 - BSA/AML compliance requirements
 - Consumer protection regulations (UDAAP)
 - Data privacy requirements (GLBA, CCPA)
 
-You are reviewing an AI/ML use case intake submission and providing enhanced risk insights.
+You are reviewing a use case intake submission and providing enhanced risk insights.
 
 ## Use Case Details
 
@@ -35,7 +35,7 @@ You are reviewing an AI/ML use case intake submission and providing enhanced ris
 **Business Line:** ${useCase.businessLine}
 **Description:** ${useCase.description}
 
-**AI/Model Type:** ${useCase.aiType}
+**Model Type:** ${useCase.aiType}
 **Usage Type:** ${useCase.usageType}
 **Deployment:** ${useCase.deployment}
 **Customer Impact:** ${useCase.customerImpact}
@@ -88,7 +88,7 @@ Based on the above information, provide:
 Respond with practical, institution-specific guidance. Be direct and avoid generic boilerplate.`;
 }
 
-export const RISK_ASSESSMENT_SYSTEM_PROMPT = `You are an expert AI/ML model risk management advisor at a financial services firm. Your role is to provide clear, actionable risk assessments that help governance teams make informed decisions.
+export const RISK_ASSESSMENT_SYSTEM_PROMPT = `You are an expert model risk management advisor at a financial services firm. Your role is to provide clear, actionable risk assessments that help governance teams make informed decisions.
 
 Key principles:
 - Be specific and contextual, not generic

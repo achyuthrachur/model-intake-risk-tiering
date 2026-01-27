@@ -17,7 +17,7 @@ const FIELD_GROUPS = [
     required: ['usageType', 'customerImpact', 'humanInLoop'] as const,
   },
   {
-    name: 'AI/Model Details',
+    name: 'Model Details',
     fields: [
       'aiType',
       'deployment',

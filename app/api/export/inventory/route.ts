@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       'Title',
       'Business Line',
       'Description',
-      'AI Type',
+      'Model Type',
       'Usage Type',
       'Customer Impact',
       'Human-in-Loop',

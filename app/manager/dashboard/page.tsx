@@ -163,7 +163,7 @@ export default function ManagerDashboard() {
                     Model Risk Manager Dashboard
                   </h1>
                   <p className="text-sm text-gray-500">
-                    Review and approve AI/ML use cases
+                    Review and approve use cases
                   </p>
                 </div>
               </div>
@@ -403,7 +403,7 @@ export default function ManagerDashboard() {
                     <tr>
                       <th>Title</th>
                       <th>Business Line</th>
-                      <th>AI Type</th>
+                      <th>Model Type</th>
                       <th>Tier</th>
                       <th>Status</th>
                       <th>Submitted By</th>

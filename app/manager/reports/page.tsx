@@ -249,7 +249,7 @@ export default function ManagerReportsPage() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-500 inline-flex items-center gap-1">
                 Total Models
-                <HelpTooltip content="All AI/ML use cases in the governance inventory" />
+                <HelpTooltip content="All use cases in the governance inventory" />
               </CardTitle>
               <Database className="w-4 h-4 text-gray-400" />
             </CardHeader>

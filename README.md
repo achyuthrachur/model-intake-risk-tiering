@@ -1,10 +1,10 @@
 # Model Intake & Risk Tiering
 
-A production-style web application for AI/ML use case governance that implements structured intake, policy-driven deployment decisions, risk detection, and audit-ready documentation.
+A production-style web application for model use case governance that implements structured intake, policy-driven deployment decisions, risk detection, and audit-ready documentation. This platform supports all model types including traditional statistical models, machine learning, GenAI, RPA, and other automated decision systems.
 
 ## Features
 
-- **Intake Wizard**: Guided multi-step form for capturing AI/ML use case details
+- **Intake Wizard**: Guided multi-step form for capturing use case details
 - **Rules-Based Tiering**: Deterministic risk tier assignment based on configurable rules
 - **Artifact Requirements**: Automatically generated checklist of required documentation
 - **Missing Evidence Detection**: Identifies gaps in compliance evidence

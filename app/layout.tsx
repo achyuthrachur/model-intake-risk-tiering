@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Model Intake & Risk Tiering',
-  description: 'AI/ML Use Case Governance Platform - Structured intake, policy-driven deployment, risk detection, and audit-ready documentation',
+  description: 'Model Intake Governance Platform - Structured intake, policy-driven deployment, risk detection, and audit-ready documentation',
 };
 
 export default function RootLayout({
