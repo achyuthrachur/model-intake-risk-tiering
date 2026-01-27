@@ -11,6 +11,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:seed": "tsx scripts/seed.ts",
+    "generate:artifacts": "tsx scripts/generate-sample-artifacts.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -35,7 +36,7 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@vercel/blob": "^2.0.1",
-    "ai": "^3.4.33",
+    "ai": "^4.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "date-fns": "^3.3.1",
@@ -44,6 +45,7 @@
     "json-logic-js": "^2.0.2",
     "lucide-react": "^0.344.0",
     "next": "14.1.3",
+    "pdf-lib": "^1.17.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.51.0",

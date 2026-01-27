@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { evaluateUseCase } from '@/lib/rules-engine';
 import type { UseCaseWithRelations } from '@/lib/types';
+import { loadArtifactsConfig } from '@/lib/config-loader';
+
+// Helper to get artifact name from config
+function getArtifactName(artifactId: string): string {
+  const config = loadArtifactsConfig();
+  const artifact = config.artifacts[artifactId];
+  return artifact?.name || artifactId;
+}
 
 // Demo use cases data
 const demoUseCases = [
@@ -245,6 +253,7 @@ export async function POST() {
 
     // Create use cases
     const createdUseCases = [];
+    let totalAttachments = 0;
 
     for (const data of demoUseCases) {
       const useCase = await prisma.useCase.create({
@@ -324,13 +333,59 @@ export async function POST() {
         },
       });
 
+      // Create sample attachments for some of the required artifacts
+      // Simulate that some artifacts have been submitted
+      const requiredArtifacts = decisionResult.requiredArtifacts || [];
+
+      // Submit 40-70% of required artifacts randomly
+      const submitRatio = 0.4 + Math.random() * 0.3;
+      const numToSubmit = Math.floor(requiredArtifacts.length * submitRatio);
+
+      // Shuffle and take a subset
+      const shuffled = [...requiredArtifacts].sort(() => Math.random() - 0.5);
+      const artifactsToSubmit = shuffled.slice(0, numToSubmit);
+
+      for (const artifactId of artifactsToSubmit) {
+        const artifactName = getArtifactName(artifactId);
+        const filename = `${artifactId}.pdf`;
+
+        await prisma.attachment.create({
+          data: {
+            useCaseId: useCase.id,
+            filename: filename,
+            type: artifactName,
+            artifactId: artifactId,
+            storagePath: `/sample-artifacts/${filename}`,
+            fileSize: 15000 + Math.floor(Math.random() * 10000), // Random size 15-25KB
+            mimeType: 'application/pdf',
+          },
+        });
+
+        // Create audit event for attachment
+        await prisma.auditEvent.create({
+          data: {
+            useCaseId: useCase.id,
+            actor: 'demo-user',
+            eventType: 'AttachmentUploaded',
+            details: JSON.stringify({
+              artifactId,
+              filename,
+              type: artifactName,
+            }),
+          },
+        });
+
+        totalAttachments++;
+      }
+
       createdUseCases.push(useCase);
     }
 
     return NextResponse.json({
       success: true,
-      message: `Created ${createdUseCases.length} demo use cases`,
+      message: `Created ${createdUseCases.length} demo use cases with ${totalAttachments} sample artifacts`,
       count: createdUseCases.length,
+      attachments: totalAttachments,
     });
   } catch (error) {
     console.error('Error seeding demo data:', error);
