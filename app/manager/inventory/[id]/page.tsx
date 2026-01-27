@@ -154,9 +154,11 @@ export default function ModelDetailPage({ params }: PageProps) {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-xl font-semibold text-gray-900">{model.useCase.title}</h1>
-                  {model.isAiEnabled && <Bot className="w-5 h-5 text-blue-500" title="AI-Enabled" />}
-                  {model.isVendorModel && (
-                    <Building2 className="w-5 h-5 text-orange-500" title="Vendor Model" />
+                  {model.useCase.aiType && model.useCase.aiType !== 'None' && (
+                    <span title="AI-Enabled"><Bot className="w-5 h-5 text-blue-500" /></span>
+                  )}
+                  {model.useCase.vendorInvolved && (
+                    <span title="Vendor Model"><Building2 className="w-5 h-5 text-orange-500" /></span>
                   )}
                 </div>
                 <p className="text-sm text-gray-500">
@@ -251,10 +253,10 @@ export default function ModelDetailPage({ params }: PageProps) {
                       <p className="text-sm text-gray-500">Customer Impact</p>
                       <p className="font-medium">{model.useCase.customerImpact}</p>
                     </div>
-                    {model.isVendorModel && (
+                    {model.useCase.vendorInvolved && (
                       <div className="col-span-2">
                         <p className="text-sm text-gray-500">Vendor</p>
-                        <p className="font-medium">{model.vendorName}</p>
+                        <p className="font-medium">{model.useCase.vendorName}</p>
                       </div>
                     )}
                   </div>

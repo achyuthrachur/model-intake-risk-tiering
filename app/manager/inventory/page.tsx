@@ -253,11 +253,11 @@ export default function InventoryDashboardPage() {
                         <div>
                           <div className="font-medium text-gray-900 flex items-center gap-2">
                             {model.useCase.title}
-                            {model.isAiEnabled && (
-                              <Bot className="w-4 h-4 text-blue-500" title="AI-Enabled" />
+                            {model.useCase.aiType && model.useCase.aiType !== 'None' && (
+                              <span title="AI-Enabled"><Bot className="w-4 h-4 text-blue-500" /></span>
                             )}
-                            {model.isVendorModel && (
-                              <Building2 className="w-4 h-4 text-orange-500" title="Vendor Model" />
+                            {model.useCase.vendorInvolved && (
+                              <span title="Vendor Model"><Building2 className="w-4 h-4 text-orange-500" /></span>
                             )}
                           </div>
                           <div className="text-sm text-gray-500">
