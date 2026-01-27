@@ -868,10 +868,15 @@ export default function ManagerUseCaseReviewPage() {
                 <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center text-blue-800">
-                        <Brain className="w-5 h-5 mr-2" />
-                        AI Artifact Review
-                      </CardTitle>
+                      <div>
+                        <CardTitle className="flex items-center text-blue-800">
+                          <Brain className="w-5 h-5 mr-2" />
+                          AI Artifact Review
+                        </CardTitle>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Checks if required documentation is uploaded and ready for approval
+                        </p>
+                      </div>
                       <Button
                         onClick={generateArtifactReview}
                         disabled={generatingArtifactReview}
@@ -958,10 +963,19 @@ export default function ManagerUseCaseReviewPage() {
                         )}
                       </div>
                     ) : (
-                      <div className="text-center py-4">
-                        <p className="text-sm text-gray-500">
-                          Click "Analyze Artifacts" to generate an AI review of uploaded documentation
-                        </p>
+                      <div className="text-center py-6 space-y-3">
+                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                          <Brain className="w-6 h-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">
+                            Check Documentation Readiness
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
+                            Reviews which required artifacts have been uploaded, calculates completion percentage,
+                            and determines if the use case is ready for MRM approval.
+                          </p>
+                        </div>
                       </div>
                     )}
                   </CardContent>

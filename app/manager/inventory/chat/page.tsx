@@ -5,6 +5,19 @@ import { Send, Bot, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+// Strip markdown formatting from AI responses
+function stripMarkdownFormatting(content: string): string {
+  return content
+    // Remove bold markers **text** -> text
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    // Remove italic markers *text* -> text
+    .replace(/\*([^*]+)\*/g, '$1')
+    // Remove _italic_ markers
+    .replace(/_([^_]+)_/g, '$1')
+    // Keep the structure but clean up
+    .trim();
+}
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -136,7 +149,11 @@ What would you like to know?`,
                   : 'bg-white border shadow-sm'
               }`}
             >
-              <div className="text-sm whitespace-pre-wrap">{message.content}</div>
+              <div className="text-sm whitespace-pre-wrap">
+                {message.role === 'assistant'
+                  ? stripMarkdownFormatting(message.content)
+                  : message.content}
+              </div>
             </div>
           </div>
         ))}

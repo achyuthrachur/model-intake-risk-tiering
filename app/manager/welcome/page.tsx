@@ -203,8 +203,8 @@ export default function ManagerWelcomePage() {
             {/* Review Intake Forms */}
             <Link href="/manager/dashboard" className="block">
               <Card className="h-full hover:shadow-lg hover:border-blue-500/50 transition-all cursor-pointer group">
-                <CardContent className="p-8">
-                  <div className="flex items-start space-x-4">
+                <CardContent className="p-8 h-full flex flex-col">
+                  <div className="flex items-start space-x-4 flex-1">
                     <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
                       <ClipboardList className="w-7 h-7 text-blue-600" />
                     </div>
@@ -243,8 +243,8 @@ export default function ManagerWelcomePage() {
             {/* View Model Inventory */}
             <Link href="/manager/inventory" className="block">
               <Card className="h-full hover:shadow-lg hover:border-purple-500/50 transition-all cursor-pointer group">
-                <CardContent className="p-8">
-                  <div className="flex items-start space-x-4">
+                <CardContent className="p-8 h-full flex flex-col">
+                  <div className="flex items-start space-x-4 flex-1">
                     <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-purple-200 transition-colors">
                       <Database className="w-7 h-7 text-purple-600" />
                     </div>
@@ -288,8 +288,8 @@ export default function ManagerWelcomePage() {
             {/* Update Policies */}
             <Link href="/manager/policy" className="block">
               <Card className="h-full hover:shadow-lg hover:border-emerald-500/50 transition-all cursor-pointer group">
-                <CardContent className="p-8">
-                  <div className="flex items-start space-x-4">
+                <CardContent className="p-8 h-full flex flex-col">
+                  <div className="flex items-start space-x-4 flex-1">
                     <div className="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-200 transition-colors">
                       <Settings className="w-7 h-7 text-emerald-600" />
                     </div>

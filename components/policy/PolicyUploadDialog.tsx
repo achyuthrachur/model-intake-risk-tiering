@@ -34,21 +34,35 @@ export function PolicyUploadDialog({
 }: PolicyUploadDialogProps) {
   const [activeTab, setActiveTab] = useState('synthetic');
   const [loading, setLoading] = useState(false);
-  const [syntheticPolicies, setSyntheticPolicies] = useState<SyntheticPolicy[]>([]);
+  const [syntheticPolicies, setSyntheticPolicies] = useState<SyntheticPolicy[]>([
+    {
+      id: 'current',
+      name: 'Current Policy (v1.0)',
+      description: 'Current active policy matching existing tiering rules (T3=12mo, T2=24mo, T1=36mo)'
+    },
+    {
+      id: 'updated',
+      name: 'Updated Policy (v2.0)',
+      description: 'Enhanced policy with stricter validation frequencies (T3=6mo, T2=12mo, T1=24mo) and new T3 elevation rules'
+    }
+  ]);
   const [selectedSynthetic, setSelectedSynthetic] = useState<string | null>(null);
   const [pastedContent, setPastedContent] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch synthetic policies when dialog opens
+  // Fetch synthetic policies when dialog opens (uses preloaded defaults above)
   const fetchSyntheticPolicies = async () => {
     try {
       const res = await fetch('/api/policy/synthetic');
       if (res.ok) {
         const data = await res.json();
-        setSyntheticPolicies(data.policies);
+        if (data.policies && data.policies.length > 0) {
+          setSyntheticPolicies(data.policies);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch synthetic policies:', err);
+      // Keep using the default policies initialized above
     }
   };
 

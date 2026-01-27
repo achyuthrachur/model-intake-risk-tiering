@@ -5,9 +5,22 @@ import ReactMarkdown from 'react-markdown';
 interface MarkdownRendererProps {
   content: string;
   className?: string;
+  stripBold?: boolean;
 }
 
-export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+// Pre-process content to strip bold/italic markers if desired
+function preprocessContent(content: string, stripBold: boolean): string {
+  if (!stripBold) return content;
+  return content
+    // Remove bold markers **text** -> text
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    // Remove italic markers *text* -> text (but not lists)
+    .replace(/(?<!\n)\*([^*\n]+)\*/g, '$1');
+}
+
+export function MarkdownRenderer({ content, className = '', stripBold = true }: MarkdownRendererProps) {
+  const processedContent = preprocessContent(content, stripBold);
+
   return (
     <div className={`prose prose-sm max-w-none ${className}`}>
       <ReactMarkdown
@@ -36,7 +49,7 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
           ),
         }}
       >
-        {content}
+        {processedContent}
       </ReactMarkdown>
     </div>
   );

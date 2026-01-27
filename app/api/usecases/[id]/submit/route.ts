@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
+import { evaluateUseCase } from '@/lib/rules-engine';
+import type { UseCaseWithRelations } from '@/lib/types';
 
 // POST /api/usecases/[id]/submit - Submit a use case for review
 export async function POST(
@@ -11,6 +13,9 @@ export async function POST(
 
     const useCase = await prisma.useCase.findUnique({
       where: { id },
+      include: {
+        attachments: true,
+      },
     });
 
     if (!useCase) {
@@ -20,13 +25,17 @@ export async function POST(
       );
     }
 
-    if (useCase.status !== 'Draft') {
+    // Allow submission from Draft or Revision Requested status
+    if (useCase.status !== 'Draft' && useCase.status !== 'Revision Requested') {
       return NextResponse.json(
-        { error: 'Only draft use cases can be submitted' },
+        { error: 'Only draft or revision requested use cases can be submitted' },
         { status: 400 }
       );
     }
 
+    const previousStatus = useCase.status;
+
+    // Update status to Submitted
     const updated = await prisma.useCase.update({
       where: { id },
       data: { status: 'Submitted' },
@@ -36,17 +45,56 @@ export async function POST(
       },
     });
 
-    // Create audit event
+    // Auto-generate decision if not exists
+    if (!updated.decision) {
+      const decisionResult = evaluateUseCase(useCase as unknown as UseCaseWithRelations);
+      await prisma.decision.create({
+        data: {
+          useCaseId: id,
+          isModel: decisionResult.isModel,
+          tier: decisionResult.tier,
+          triggeredRules: JSON.stringify(decisionResult.triggeredRules),
+          rationaleSummary: decisionResult.rationaleSummary,
+          requiredArtifacts: JSON.stringify(decisionResult.requiredArtifacts),
+          missingEvidence: JSON.stringify(decisionResult.missingEvidence),
+          riskFlags: JSON.stringify(decisionResult.riskFlags),
+        },
+      });
+
+      // Create audit event for decision
+      await prisma.auditEvent.create({
+        data: {
+          useCaseId: id,
+          actor: 'system',
+          eventType: 'DecisionGenerated',
+          details: JSON.stringify({
+            tier: decisionResult.tier,
+            isModel: decisionResult.isModel,
+          }),
+        },
+      });
+    }
+
+    // Create audit event for submission
     await prisma.auditEvent.create({
       data: {
         useCaseId: id,
         actor: 'demo-user',
         eventType: 'Submitted',
-        details: JSON.stringify({ previousStatus: 'Draft', newStatus: 'Submitted' }),
+        details: JSON.stringify({ previousStatus, newStatus: 'Submitted' }),
       },
     });
 
-    return NextResponse.json(updated);
+    // Refetch to include the decision
+    const finalResult = await prisma.useCase.findUnique({
+      where: { id },
+      include: {
+        decision: true,
+        attachments: true,
+      },
+    });
+
+    return NextResponse.json(finalResult);
   } catch (error) {
     console.error('Error submitting use case:', error);
     return NextResponse.json(

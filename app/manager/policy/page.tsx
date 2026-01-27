@@ -258,17 +258,26 @@ export default function PolicyManagementPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex justify-between items-center p-2 bg-red-50 rounded">
-                  <span className="text-sm font-medium">T3 (High Risk)</span>
-                  <Badge variant="outline">{currentFrequencies.T3} months</Badge>
+                <div className="p-2 bg-red-50 rounded border border-red-100">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-red-900">T3 (High Risk)</span>
+                    <Badge variant="outline" className="bg-white">{currentFrequencies.T3} months</Badge>
+                  </div>
+                  <p className="text-xs text-red-700 mt-1">Decisioning + Customer Impact, No HITL, GenAI Customer-Facing, Lending/Credit, AML/BSA</p>
                 </div>
-                <div className="flex justify-between items-center p-2 bg-amber-50 rounded">
-                  <span className="text-sm font-medium">T2 (Medium Risk)</span>
-                  <Badge variant="outline">{currentFrequencies.T2} months</Badge>
+                <div className="p-2 bg-amber-50 rounded border border-amber-100">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-amber-900">T2 (Medium Risk)</span>
+                    <Badge variant="outline" className="bg-white">{currentFrequencies.T2} months</Badge>
+                  </div>
+                  <p className="text-xs text-amber-700 mt-1">Advisory + Regulatory, PII/NPI Processing, Sensitive Attributes, Vendor Models, GenAI Internal</p>
                 </div>
-                <div className="flex justify-between items-center p-2 bg-green-50 rounded">
-                  <span className="text-sm font-medium">T1 (Low Risk)</span>
-                  <Badge variant="outline">{currentFrequencies.T1} months</Badge>
+                <div className="p-2 bg-green-50 rounded border border-green-100">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-green-900">T1 (Low Risk)</span>
+                    <Badge variant="outline" className="bg-white">{currentFrequencies.T1} months</Badge>
+                  </div>
+                  <p className="text-xs text-green-700 mt-1">Internal Automation (No Customer Impact), Rules-Based Systems</p>
                 </div>
               </CardContent>
             </Card>

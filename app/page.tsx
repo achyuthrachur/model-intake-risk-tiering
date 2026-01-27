@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -15,13 +16,25 @@ import {
   Download,
   MessageSquare,
   History,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  GitBranch,
+  Target,
+  Workflow,
+  Scale,
+  Search,
+  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { HelpTooltip } from '@/components/ui/help-tooltip';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function WelcomePage() {
+  const [activeTab, setActiveTab] = useState('overview');
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-purple-50">
       {/* Header */}
@@ -49,7 +62,7 @@ export default function WelcomePage() {
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Hero Section */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <div className="inline-flex items-center justify-center w-14 h-14 bg-primary/10 rounded-2xl mb-3">
               <Shield className="w-7 h-7 text-primary" />
             </div>
@@ -60,6 +73,212 @@ export default function WelcomePage() {
               Structured intake and risk tiering for AI/ML model governance under SR 11-7, OCC 2011-12, and emerging AI frameworks.
             </p>
           </div>
+
+          {/* Tabs for Overview vs About */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+              <TabsTrigger value="overview" className="flex items-center gap-2">
+                <Layers className="w-4 h-4" />
+                Get Started
+              </TabsTrigger>
+              <TabsTrigger value="about" className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4" />
+                About & README
+              </TabsTrigger>
+            </TabsList>
+
+            {/* About Tab Content */}
+            <TabsContent value="about" className="mt-6">
+              <div className="bg-white rounded-xl border shadow-sm p-6 space-y-8">
+                {/* Executive Summary */}
+                <section>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <Target className="w-5 h-5 text-primary" />
+                    Executive Summary
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    This Model Use Case Governance Platform is a comprehensive solution designed for Model Risk Management (MRM)
+                    teams at financial institutions. It provides end-to-end workflow automation for model intake, risk tiering,
+                    artifact management, validation tracking, and finding remediation - all aligned with SR 11-7, OCC 2011-12,
+                    and emerging AI/ML governance frameworks.
+                  </p>
+                </section>
+
+                {/* Who This Is For */}
+                <section>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <User className="w-5 h-5 text-blue-600" />
+                    Who This Platform Is For
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                      <h4 className="font-semibold text-blue-900 mb-2">Model Risk Managers</h4>
+                      <ul className="text-sm text-blue-800 space-y-1">
+                        <li>- MRM Analysts and Senior Analysts</li>
+                        <li>- Model Validation Officers</li>
+                        <li>- Chief Model Risk Officers</li>
+                        <li>- Compliance and Risk Leadership</li>
+                      </ul>
+                    </div>
+                    <div className="bg-purple-50 rounded-lg p-4 border border-purple-100">
+                      <h4 className="font-semibold text-purple-900 mb-2">Model Owners & Developers</h4>
+                      <ul className="text-sm text-purple-800 space-y-1">
+                        <li>- Data Scientists and ML Engineers</li>
+                        <li>- Business Analysts</li>
+                        <li>- Product Managers</li>
+                        <li>- Technology Teams deploying AI/ML</li>
+                      </ul>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Process Flows */}
+                <section>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <Workflow className="w-5 h-5 text-green-600" />
+                    Process Flows
+                  </h3>
+                  <div className="bg-gray-50 rounded-lg p-4 border">
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">1. Intake Flow (Model Owner)</h4>
+                        <div className="flex flex-wrap items-center gap-2 text-sm">
+                          <Badge variant="outline">Submit Use Case</Badge>
+                          <ChevronDown className="w-4 h-4 text-gray-400 rotate-[-90deg]" />
+                          <Badge variant="outline">AI/Form Intake</Badge>
+                          <ChevronDown className="w-4 h-4 text-gray-400 rotate-[-90deg]" />
+                          <Badge variant="outline">Auto Risk Tiering</Badge>
+                          <ChevronDown className="w-4 h-4 text-gray-400 rotate-[-90deg]" />
+                          <Badge variant="outline">Upload Artifacts</Badge>
+                          <ChevronDown className="w-4 h-4 text-gray-400 rotate-[-90deg]" />
+                          <Badge variant="outline">Submit for Review</Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">2. Review Flow (MRM)</h4>
+                        <div className="flex flex-wrap items-center gap-2 text-sm">
+                          <Badge variant="outline" className="bg-purple-50">Receive Submission</Badge>
+                          <ChevronDown className="w-4 h-4 text-gray-400 rotate-[-90deg]" />
+                          <Badge variant="outline" className="bg-purple-50">Review Tier Decision</Badge>
+                          <ChevronDown className="w-4 h-4 text-gray-400 rotate-[-90deg]" />
+                          <Badge variant="outline" className="bg-purple-50">Check Artifacts</Badge>
+                          <ChevronDown className="w-4 h-4 text-gray-400 rotate-[-90deg]" />
+                          <Badge variant="outline" className="bg-purple-50">Approve / Send Back</Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-2">3. Inventory Lifecycle (MRM)</h4>
+                        <div className="flex flex-wrap items-center gap-2 text-sm">
+                          <Badge variant="outline" className="bg-green-50">Add to Inventory</Badge>
+                          <ChevronDown className="w-4 h-4 text-gray-400 rotate-[-90deg]" />
+                          <Badge variant="outline" className="bg-green-50">Track Validations</Badge>
+                          <ChevronDown className="w-4 h-4 text-gray-400 rotate-[-90deg]" />
+                          <Badge variant="outline" className="bg-green-50">Log Findings</Badge>
+                          <ChevronDown className="w-4 h-4 text-gray-400 rotate-[-90deg]" />
+                          <Badge variant="outline" className="bg-green-50">Monitor Remediation</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Key Capabilities */}
+                <section>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <Scale className="w-5 h-5 text-amber-600" />
+                    Key Capabilities
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex gap-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <FileText className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-gray-900">Structured Intake</h5>
+                          <p className="text-sm text-gray-600">40+ attributes captured via form wizard or AI chatbot. Supports all model types: Traditional ML, GenAI, RPA, Rules-based, Hybrid.</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Layers className="w-4 h-4 text-amber-600" />
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-gray-900">Policy-Driven Tiering</h5>
+                          <p className="text-sm text-gray-600">Configurable rules engine assigns T1/T2/T3 based on usage type, customer impact, regulatory domain, data sensitivity, and more.</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <FileCheck className="w-4 h-4 text-green-600" />
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-gray-900">Artifact Management</h5>
+                          <p className="text-sm text-gray-600">Auto-generated artifact requirements by tier. Categories include Policy, Validation, GenAI, Monitoring, Vendor, and Privacy artifacts.</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex gap-3">
+                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Search className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-gray-900">Validation Tracking</h5>
+                          <p className="text-sm text-gray-600">Track Initial, Periodic, Triggered, and Ad-hoc validations. Automatic due date calculation based on tier and policy frequency.</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <AlertTriangle className="w-4 h-4 text-red-600" />
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-gray-900">Finding Remediation</h5>
+                          <p className="text-sm text-gray-600">Log validation findings by severity and category. Track remediation status with MRM sign-off workflow.</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <GitBranch className="w-4 h-4 text-indigo-600" />
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-gray-900">Policy Management</h5>
+                          <p className="text-sm text-gray-600">Upload policy documents, AI-analyze changes, preview impact on existing inventory, and apply new validation frequencies.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Value Proposition */}
+                <section className="bg-gradient-to-r from-primary/5 to-purple-50 rounded-lg p-5 border">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">Why MRM Professionals Choose This Platform</h3>
+                  <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">40+</div>
+                      <div className="text-sm text-gray-600">Intake Attributes</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">3</div>
+                      <div className="text-sm text-gray-600">Risk Tiers with Configurable Rules</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">100%</div>
+                      <div className="text-sm text-gray-600">Audit Trail Coverage</div>
+                    </div>
+                  </div>
+                  <ul className="mt-4 text-sm text-gray-700 space-y-1">
+                    <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-500" /> Reduces intake inconsistency across business lines</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-500" /> Automates tier assignment per policy requirements</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-500" /> Provides exam-ready documentation and reports</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-500" /> Scales from dozens to thousands of models</li>
+                  </ul>
+                </section>
+              </div>
+            </TabsContent>
+
+            {/* Overview Tab Content (existing content) */}
+            <TabsContent value="overview" className="mt-6">
 
           {/* Main Grid: Platform Info + Role Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -297,6 +516,8 @@ export default function WelcomePage() {
               </div>
             </div>
           </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
 

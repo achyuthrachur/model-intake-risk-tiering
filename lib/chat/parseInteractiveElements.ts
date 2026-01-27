@@ -19,10 +19,12 @@ export interface ParsedMessage {
  * <<<OPTIONS:radio:fieldName>>>
  * ["Option 1", "Option 2", "Option 3"]
  * <<<END>>>
+ *
+ * Also handles variations like << or <<< at start/end
  */
 export function parseMessageForInteractiveElements(content: string): ParsedMessage {
-  // Match the OPTIONS block pattern
-  const pattern = /<<<OPTIONS:(radio|checkbox):(\w+)>>>\s*\n?\s*\[([\s\S]*?)\]\s*\n?\s*<<<END>>>/;
+  // Match the OPTIONS block pattern - flexible with << or <<<
+  const pattern = /<?<<OPTIONS:(radio|checkbox):(\w+)>>?>?\s*\n?\s*\[([\s\S]*?)\]\s*\n?\s*<?<<<?END>>?>?/;
   const match = content.match(pattern);
 
   if (!match) {
@@ -67,7 +69,7 @@ export function parseMessageForInteractiveElements(content: string): ParsedMessa
  */
 export function stripInteractiveMarkup(content: string): string {
   return content.replace(
-    /<<<OPTIONS:(radio|checkbox):(\w+)>>>\s*\n?\s*\[[\s\S]*?\]\s*\n?\s*<<<END>>>/g,
+    /<?<<OPTIONS:(radio|checkbox):(\w+)>>?>?\s*\n?\s*\[[\s\S]*?\]\s*\n?\s*<?<<<?END>>?>?/g,
     ''
   ).trim();
 }
