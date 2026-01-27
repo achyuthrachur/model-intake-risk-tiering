@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import {
   ArrowLeft,
   FileText,
@@ -27,12 +28,10 @@ import {
 import { formatDate, getSeverityColor, getRemediationStatusColor } from '@/lib/utils';
 import type { ValidationData, ValidationFindingData } from '@/lib/types';
 
-interface PageProps {
-  params: Promise<{ id: string; validationId: string }>;
-}
-
-export default function ValidationDetailPage({ params }: PageProps) {
-  const { id, validationId } = use(params);
+export default function ValidationDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const validationId = params.validationId as string;
   const [validation, setValidation] = useState<ValidationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedFinding, setSelectedFinding] = useState<ValidationFindingData | null>(null);

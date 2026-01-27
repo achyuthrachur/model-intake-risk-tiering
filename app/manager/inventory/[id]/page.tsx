@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import {
   ArrowLeft,
   Calendar,
@@ -33,12 +33,9 @@ import {
 } from '@/lib/utils';
 import type { InventoryModelWithDetails, ValidationData, ValidationFindingData } from '@/lib/types';
 
-interface PageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default function ModelDetailPage({ params }: PageProps) {
-  const { id } = use(params);
+export default function ModelDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
   const router = useRouter();
   const [model, setModel] = useState<InventoryModelWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
