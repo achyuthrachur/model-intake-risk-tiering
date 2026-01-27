@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import type { UseCaseWithRelations } from '@/lib/types';
 
+// Force dynamic rendering since this route uses searchParams
+export const dynamic = 'force-dynamic';
+
 // GET /api/export/inventory - Export all use cases as CSV for full model inventory
 export async function GET(request: NextRequest) {
   try {

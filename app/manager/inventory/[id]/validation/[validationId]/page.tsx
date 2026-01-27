@@ -23,6 +23,7 @@ import {
   Sparkles,
   Plus,
   Loader2,
+  Copy,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -1032,8 +1033,13 @@ export default function ValidationDetailPage() {
               <Button
                 onClick={() => {
                   navigator.clipboard.writeText(memoContent);
+                  toast({
+                    title: 'Copied!',
+                    description: 'Memo content copied to clipboard',
+                  });
                 }}
               >
+                <Copy className="w-4 h-4 mr-2" />
                 Copy to Clipboard
               </Button>
             )}

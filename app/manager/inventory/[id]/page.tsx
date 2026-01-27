@@ -26,6 +26,7 @@ import {
   Paperclip,
   Loader2,
   Plus,
+  Copy,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -651,6 +652,23 @@ export default function ModelDetailPage() {
                   </Button>
                   {emailContent && (
                     <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between mb-3 pb-2 border-b">
+                        <span className="text-sm font-medium text-gray-700">Generated Email</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            navigator.clipboard.writeText(emailContent);
+                            toast({
+                              title: 'Copied!',
+                              description: 'Email content copied to clipboard',
+                            });
+                          }}
+                        >
+                          <Copy className="w-4 h-4 mr-1" />
+                          Copy
+                        </Button>
+                      </div>
                       <MarkdownRenderer content={emailContent} className="text-sm" />
                     </div>
                   )}

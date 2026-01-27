@@ -39,6 +39,21 @@ export default function InventoryDashboardPage() {
   const [tierFilter, setTierFilter] = useState<string>('all');
   const [validationStatusFilter, setValidationStatusFilter] = useState<string>('all');
   const [showChatbot, setShowChatbot] = useState(false);
+  const [seedingData, setSeedingData] = useState(false);
+
+  const seedDemoData = async () => {
+    setSeedingData(true);
+    try {
+      const response = await fetch('/api/admin/seed-inventory', { method: 'POST' });
+      if (response.ok) {
+        await fetchData();
+      }
+    } catch (error) {
+      console.error('Failed to seed demo data:', error);
+    } finally {
+      setSeedingData(false);
+    }
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -107,12 +122,10 @@ export default function InventoryDashboardPage() {
                 <MessageSquare className="w-4 h-4 mr-2" />
                 AI Assistant
               </Button>
-              <Link href="/api/admin/seed-inventory">
-                <Button variant="outline" size="sm">
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Load Demo Data
-                </Button>
-              </Link>
+              <Button variant="outline" size="sm" onClick={seedDemoData} disabled={seedingData}>
+                <RefreshCw className={`w-4 h-4 mr-2 ${seedingData ? 'animate-spin' : ''}`} />
+                {seedingData ? 'Loading...' : 'Load Demo Data'}
+              </Button>
             </div>
           </div>
         </div>
