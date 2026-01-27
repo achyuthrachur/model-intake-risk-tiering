@@ -131,7 +131,8 @@ This will just take a few minutes. Let's start with the basics - what's the name
   const handleSubmitUseCase = async () => {
     setIsSubmitting(true);
     try {
-      const requiredFields = ['title', 'businessLine', 'description', 'aiType', 'usageType', 'humanInLoop', 'customerImpact', 'deployment'];
+      // The chatbot uses 'modelType' but the API expects 'aiType'
+      const requiredFields = ['title', 'businessLine', 'description', 'modelType', 'usageType', 'humanInLoop', 'customerImpact', 'deployment'];
       const missing = requiredFields.filter(field => !collectedData[field as keyof typeof collectedData]);
 
       if (missing.length > 0) {
@@ -144,8 +145,10 @@ This will just take a few minutes. Let's start with the basics - what's the name
         return;
       }
 
+      // Map modelType to aiType for the API
       const dataToSubmit = {
         ...collectedData,
+        aiType: collectedData.modelType, // Map modelType -> aiType for database
         regulatoryDomains: collectedData.regulatoryDomains || [],
       };
 

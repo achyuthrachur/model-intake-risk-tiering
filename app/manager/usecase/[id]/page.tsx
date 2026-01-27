@@ -74,6 +74,10 @@ export default function ManagerUseCaseReviewPage() {
   const [approving, setApproving] = useState(false);
   const [sendingBack, setSendingBack] = useState(false);
 
+  // AI Artifact Review state
+  const [artifactReview, setArtifactReview] = useState<any>(null);
+  const [generatingArtifactReview, setGeneratingArtifactReview] = useState(false);
+
   const id = params.id as string;
 
   useEffect(() => {
@@ -84,8 +88,47 @@ export default function ManagerUseCaseReviewPage() {
   useEffect(() => {
     if (useCase?.decision) {
       fetchAIInsights();
+      fetchArtifactReview();
     }
   }, [useCase?.decision?.id]);
+
+  const fetchArtifactReview = async () => {
+    try {
+      const response = await fetch(`/api/usecases/${id}/ai-artifact-review`);
+      if (response.ok) {
+        const data = await response.json();
+        setArtifactReview(data);
+      }
+    } catch (error) {
+      console.log('No artifact review available');
+    }
+  };
+
+  const generateArtifactReview = async () => {
+    try {
+      setGeneratingArtifactReview(true);
+      const response = await fetch(`/api/usecases/${id}/ai-artifact-review`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate artifact review');
+      }
+
+      const data = await response.json();
+      setArtifactReview(data);
+      toast({ title: 'Artifact Review Generated', description: 'AI has analyzed the uploaded artifacts' });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to generate artifact review',
+        variant: 'destructive',
+      });
+    } finally {
+      setGeneratingArtifactReview(false);
+    }
+  };
 
   const fetchAIInsights = async () => {
     try {
@@ -821,6 +864,168 @@ export default function ManagerUseCaseReviewPage() {
               </Card>
             ) : (
               <>
+                {/* AI Artifact Review Summary */}
+                <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center text-blue-800">
+                        <Brain className="w-5 h-5 mr-2" />
+                        AI Artifact Review
+                      </CardTitle>
+                      <Button
+                        onClick={generateArtifactReview}
+                        disabled={generatingArtifactReview}
+                        size="sm"
+                        variant="outline"
+                      >
+                        {generatingArtifactReview ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Analyzing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            {artifactReview ? 'Re-analyze' : 'Analyze Artifacts'}
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {artifactReview ? (
+                      <div className="space-y-4">
+                        {/* Completion Progress */}
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">Documentation Completion</span>
+                            <span className="text-sm font-bold text-blue-700">
+                              {artifactReview.completionPercentage}%
+                            </span>
+                          </div>
+                          <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full transition-all duration-500 ${
+                                artifactReview.completionPercentage === 100
+                                  ? 'bg-green-500'
+                                  : artifactReview.completionPercentage >= 70
+                                  ? 'bg-blue-500'
+                                  : 'bg-amber-500'
+                              }`}
+                              style={{ width: `${artifactReview.completionPercentage}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* AI Summary */}
+                        <div className="p-3 bg-white rounded-lg border">
+                          <p className="text-sm text-gray-700">{artifactReview.summary}</p>
+                        </div>
+
+                        {/* Ready for Approval Badge */}
+                        <div className="flex items-center gap-2">
+                          {artifactReview.readyForApproval ? (
+                            <Badge className="bg-green-100 text-green-800 border-green-200">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Ready for Approval
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-amber-100 text-amber-800 border-amber-200">
+                              <AlertCircle className="w-3 h-3 mr-1" />
+                              Additional Documentation Required
+                            </Badge>
+                          )}
+                          {artifactReview.aiPowered && (
+                            <Badge variant="outline" className="text-xs">
+                              AI-Powered
+                            </Badge>
+                          )}
+                        </div>
+
+                        {/* Recommendations */}
+                        {artifactReview.recommendations && artifactReview.recommendations.length > 0 && (
+                          <div>
+                            <h4 className="text-sm font-medium mb-2">Recommendations</h4>
+                            <ul className="space-y-1">
+                              {artifactReview.recommendations.map((rec: string, i: number) => (
+                                <li key={i} className="text-sm text-gray-600 flex items-start">
+                                  <ChevronRight className="w-4 h-4 mr-1 mt-0.5 text-blue-500" />
+                                  {rec}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4">
+                        <p className="text-sm text-gray-500">
+                          Click "Analyze Artifacts" to generate an AI review of uploaded documentation
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Uploaded Files */}
+                {useCase.attachments && useCase.attachments.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <FileText className="w-5 h-5 mr-2" />
+                        Uploaded Documentation ({useCase.attachments.length})
+                      </CardTitle>
+                      <CardDescription>
+                        Files uploaded by the model owner
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {useCase.attachments.map((attachment: any) => {
+                          const artifact = attachment.artifactId
+                            ? artifactsConfig?.artifacts[attachment.artifactId]
+                            : null;
+                          return (
+                            <div
+                              key={attachment.id}
+                              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                  <FileText className="w-5 h-5 text-blue-600" />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-sm">{attachment.filename}</p>
+                                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <span>{attachment.type}</span>
+                                    {artifact && (
+                                      <>
+                                        <span>•</span>
+                                        <span className="text-green-600">{artifact.name}</span>
+                                      </>
+                                    )}
+                                    <span>•</span>
+                                    <span>{formatDate(attachment.createdAt)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => window.open(attachment.storagePath, '_blank')}
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                View
+                              </Button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Missing Evidence Alert */}
                 {missingEvidence.length > 0 && (
                   <Card className="border-amber-200 bg-amber-50">
                     <CardHeader>
@@ -845,6 +1050,7 @@ export default function ManagerUseCaseReviewPage() {
                   </Card>
                 )}
 
+                {/* Required Artifacts Checklist */}
                 {Object.entries(groupedArtifacts).map(([category, artifacts]) => (
                   <Card key={category}>
                     <CardHeader>
@@ -855,34 +1061,61 @@ export default function ManagerUseCaseReviewPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {artifacts.map((artifact: any) => (
-                          <div
-                            key={artifact.id}
-                            className={`p-4 rounded-lg border ${
-                              artifact.isMissing ? 'bg-amber-50 border-amber-200' : 'bg-gray-50'
-                            }`}
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start">
-                                {artifact.isMissing ? (
-                                  <AlertCircle className="w-5 h-5 text-amber-500 mr-3 mt-0.5" />
-                                ) : (
-                                  <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5" />
-                                )}
-                                <div>
-                                  <h4 className="font-medium">{artifact.name}</h4>
-                                  <p className="text-sm text-gray-600 mt-1">{artifact.description}</p>
-                                  <p className="text-xs text-gray-500 mt-2">Owner: {artifact.ownerRole}</p>
+                        {artifacts.map((artifact: any) => {
+                          const uploadedFile = useCase.attachments?.find(
+                            (a: any) => a.artifactId === artifact.id
+                          );
+                          return (
+                            <div
+                              key={artifact.id}
+                              className={`p-4 rounded-lg border ${
+                                artifact.isMissing ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-start">
+                                  {artifact.isMissing ? (
+                                    <AlertCircle className="w-5 h-5 text-amber-500 mr-3 mt-0.5" />
+                                  ) : (
+                                    <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5" />
+                                  )}
+                                  <div>
+                                    <h4 className="font-medium">{artifact.name}</h4>
+                                    <p className="text-sm text-gray-600 mt-1">{artifact.description}</p>
+                                    {uploadedFile && (
+                                      <p className="text-xs text-green-600 mt-2 flex items-center">
+                                        <FileText className="w-3 h-3 mr-1" />
+                                        {uploadedFile.filename}
+                                      </p>
+                                    )}
+                                    <p className="text-xs text-gray-500 mt-1">Owner: {artifact.ownerRole}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {uploadedFile && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => window.open(uploadedFile.storagePath, '_blank')}
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                    </Button>
+                                  )}
+                                  <Badge
+                                    variant="outline"
+                                    className={
+                                      artifact.isMissing
+                                        ? 'bg-amber-100 text-amber-700 border-amber-200'
+                                        : 'bg-green-100 text-green-700 border-green-200'
+                                    }
+                                  >
+                                    {artifact.isMissing ? 'Missing' : 'Provided'}
+                                  </Badge>
                                 </div>
                               </div>
-                              {artifact.isMissing && (
-                                <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-200">
-                                  Missing
-                                </Badge>
-                              )}
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </CardContent>
                   </Card>

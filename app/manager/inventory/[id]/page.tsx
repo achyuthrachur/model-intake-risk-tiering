@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import {
@@ -18,12 +18,21 @@ import {
   ChevronRight,
   Shield,
   XCircle,
+  Download,
+  ExternalLink,
+  File,
+  FileSpreadsheet,
+  FileImage,
+  Paperclip,
+  Loader2,
+  Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ValidationStatusBadge } from '@/components/inventory/ValidationStatusBadge';
+import { useToast } from '@/components/ui/use-toast';
 import {
   getTierBadgeColor,
   formatDate,
@@ -31,16 +40,19 @@ import {
   getRemediationStatusColor,
   type ValidationStatus,
 } from '@/lib/utils';
+import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
 import type { InventoryModelWithDetails, ValidationData, ValidationFindingData } from '@/lib/types';
 
 export default function ModelDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
+  const { toast } = useToast();
   const [model, setModel] = useState<InventoryModelWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [generatingEmail, setGeneratingEmail] = useState(false);
   const [emailContent, setEmailContent] = useState<string | null>(null);
+  const [generatingValidation, setGeneratingValidation] = useState(false);
 
   useEffect(() => {
     async function fetchModel() {
@@ -60,7 +72,7 @@ export default function ModelDetailPage() {
   }, [id]);
 
   const handleGenerateEmail = async () => {
-    if (!model) return;
+    if (!model || generatingEmail) return;
     setGeneratingEmail(true);
     setEmailContent(null);
 
@@ -99,10 +111,58 @@ export default function ModelDetailPage() {
       }
     } catch (error) {
       console.error('Error generating email:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to generate email',
+        variant: 'destructive',
+      });
     } finally {
       setGeneratingEmail(false);
     }
   };
+
+  const handleGenerateDemoValidation = useCallback(async () => {
+    if (!model || generatingValidation) return;
+    setGeneratingValidation(true);
+
+    try {
+      const res = await fetch(`/api/inventory/${id}/synthetic-data`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          includeReport: true,
+          findingsCount: 'random',
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to generate validation');
+      }
+
+      const data = await res.json();
+      toast({
+        title: 'Demo Validation Generated',
+        description: data.message || 'A synthetic validation with findings has been created.',
+      });
+
+      // Refresh the model data
+      const modelRes = await fetch(`/api/inventory/${id}`);
+      if (modelRes.ok) {
+        const modelData = await modelRes.json();
+        setModel(modelData);
+      }
+    } catch (error) {
+      console.error('Error generating demo validation:', error);
+      toast({
+        title: 'Generation Failed',
+        description: error instanceof Error ? error.message : 'Failed to generate demo validation',
+        variant: 'destructive',
+      });
+    } finally {
+      setGeneratingValidation(false);
+    }
+  }, [model, id, generatingValidation, toast]);
 
   if (loading) {
     return (
@@ -217,6 +277,9 @@ export default function ModelDetailPage() {
               )}
             </TabsTrigger>
             <TabsTrigger value="ai">AI Actions</TabsTrigger>
+            <TabsTrigger value="artifacts">
+              Artifacts ({model.useCase.attachments?.length || 0})
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -322,65 +385,155 @@ export default function ModelDetailPage() {
           <TabsContent value="validations">
             <Card>
               <CardHeader>
-                <CardTitle>Validation History</CardTitle>
-                <CardDescription>
-                  All validation events for this model
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Validation History</CardTitle>
+                    <CardDescription>
+                      All validation events for this model
+                    </CardDescription>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={handleGenerateDemoValidation}
+                    disabled={generatingValidation}
+                  >
+                    {generatingValidation ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Demo Validation
+                      </>
+                    )}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 {model.validations && model.validations.length > 0 ? (
                   <div className="space-y-4">
-                    {model.validations.map((validation: ValidationData) => (
-                      <div
-                        key={validation.id}
-                        className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                        onClick={() =>
-                          router.push(`/manager/inventory/${model.id}/validation/${validation.id}`)
-                        }
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
+                    {model.validations.map((validation: ValidationData) => {
+                      const findingsOpen = validation.findings?.filter(
+                        (f) => f.remediationStatus === 'Open' || f.remediationStatus === 'In Progress'
+                      ).length || 0;
+
+                      return (
+                        <div
+                          key={validation.id}
+                          className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="flex items-center justify-between">
                             <div
-                              className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                validation.overallResult === 'Satisfactory'
-                                  ? 'bg-green-100 text-green-600'
-                                  : validation.overallResult === 'Unsatisfactory'
-                                  ? 'bg-red-100 text-red-600'
-                                  : 'bg-amber-100 text-amber-600'
-                              }`}
-                            >
-                              <FileText className="w-5 h-5" />
-                            </div>
-                            <div>
-                              <p className="font-medium">{validation.validationType} Validation</p>
-                              <p className="text-sm text-gray-500">
-                                {formatDate(validation.validationDate)} · {validation.validatedBy}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <Badge
-                              className={
-                                validation.overallResult === 'Satisfactory'
-                                  ? 'bg-green-100 text-green-800'
-                                  : validation.overallResult === 'Unsatisfactory'
-                                  ? 'bg-red-100 text-red-800'
-                                  : 'bg-amber-100 text-amber-800'
+                              className="flex items-center gap-3 flex-1 cursor-pointer"
+                              onClick={() =>
+                                router.push(`/manager/inventory/${model.id}/validation/${validation.id}`)
                               }
                             >
-                              {validation.overallResult || validation.status}
-                            </Badge>
-                            {validation.findings && validation.findings.length > 0 && (
-                              <Badge variant="outline">
-                                {validation.findings.length} finding
-                                {validation.findings.length !== 1 ? 's' : ''}
+                              <div
+                                className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                  validation.overallResult === 'Satisfactory'
+                                    ? 'bg-green-100 text-green-600'
+                                    : validation.overallResult === 'Unsatisfactory'
+                                    ? 'bg-red-100 text-red-600'
+                                    : 'bg-amber-100 text-amber-600'
+                                }`}
+                              >
+                                <FileText className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <p className="font-medium">{validation.validationType} Validation</p>
+                                <p className="text-sm text-gray-500">
+                                  {formatDate(validation.validationDate)} · {validation.validatedBy}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Badge
+                                className={
+                                  validation.overallResult === 'Satisfactory'
+                                    ? 'bg-green-100 text-green-800'
+                                    : validation.overallResult === 'Unsatisfactory'
+                                    ? 'bg-red-100 text-red-800'
+                                    : 'bg-amber-100 text-amber-800'
+                                }
+                              >
+                                {validation.overallResult || validation.status}
                               </Badge>
-                            )}
-                            <ChevronRight className="w-5 h-5 text-gray-400" />
+                              {validation.findings && validation.findings.length > 0 && (
+                                <Badge
+                                  variant="outline"
+                                  className={findingsOpen > 0 ? 'border-red-200 text-red-700' : ''}
+                                >
+                                  {validation.findings.length} finding
+                                  {validation.findings.length !== 1 ? 's' : ''}
+                                  {findingsOpen > 0 && ` (${findingsOpen} open)`}
+                                </Badge>
+                              )}
+                              {validation.reportStoragePath && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(validation.reportStoragePath!, '_blank');
+                                  }}
+                                >
+                                  <Download className="w-4 h-4 mr-1" />
+                                  Report
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  router.push(`/manager/inventory/${model.id}/validation/${validation.id}`)
+                                }
+                              >
+                                <ChevronRight className="w-5 h-5 text-gray-400" />
+                              </Button>
+                            </div>
                           </div>
+
+                          {/* Validation Summary Notes */}
+                          {validation.summaryNotes && (
+                            <div className="mt-3 pt-3 border-t">
+                              <p className="text-sm text-gray-600">{validation.summaryNotes}</p>
+                            </div>
+                          )}
+
+                          {/* Quick Findings Preview */}
+                          {validation.findings && validation.findings.length > 0 && (
+                            <div className="mt-3 pt-3 border-t">
+                              <div className="flex flex-wrap gap-2">
+                                {validation.findings.slice(0, 4).map((finding) => (
+                                  <div
+                                    key={finding.id}
+                                    className={`text-xs px-2 py-1 rounded-full ${
+                                      finding.mrmSignedOff
+                                        ? 'bg-green-100 text-green-700'
+                                        : finding.remediationStatus === 'Open'
+                                        ? 'bg-red-100 text-red-700'
+                                        : finding.remediationStatus === 'In Progress'
+                                        ? 'bg-amber-100 text-amber-700'
+                                        : 'bg-blue-100 text-blue-700'
+                                    }`}
+                                  >
+                                    {finding.findingNumber}: {finding.severity}
+                                  </div>
+                                ))}
+                                {validation.findings.length > 4 && (
+                                  <span className="text-xs text-gray-500 px-2 py-1">
+                                    +{validation.findings.length - 4} more
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-8">
@@ -498,7 +651,7 @@ export default function ModelDetailPage() {
                   </Button>
                   {emailContent && (
                     <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                      <pre className="whitespace-pre-wrap text-sm font-mono">{emailContent}</pre>
+                      <MarkdownRenderer content={emailContent} className="text-sm" />
                     </div>
                   )}
                 </CardContent>
@@ -540,6 +693,289 @@ export default function ModelDetailPage() {
                     <p className="text-sm text-gray-500">
                       No findings awaiting sign-off. Remediate a finding first to generate a memo.
                     </p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Artifacts Tab */}
+          <TabsContent value="artifacts">
+            <div className="space-y-6">
+              {/* Intake Documentation */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Paperclip className="w-5 h-5" />
+                    Intake Documentation
+                  </CardTitle>
+                  <CardDescription>
+                    Documents submitted during the model intake process
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {model.useCase.attachments && model.useCase.attachments.length > 0 ? (
+                    <div className="space-y-3">
+                      {model.useCase.attachments.map((attachment) => {
+                        const isPdf = attachment.mimeType?.includes('pdf');
+                        const isImage = attachment.mimeType?.startsWith('image/');
+                        const isSpreadsheet = attachment.mimeType?.includes('spreadsheet') ||
+                          attachment.mimeType?.includes('excel') ||
+                          attachment.filename.endsWith('.xlsx') ||
+                          attachment.filename.endsWith('.csv');
+
+                        const IconComponent = isPdf ? FileText : isImage ? FileImage : isSpreadsheet ? FileSpreadsheet : File;
+
+                        return (
+                          <div
+                            key={attachment.id}
+                            className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                                <IconComponent className="w-5 h-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900">{attachment.filename}</p>
+                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                  <Badge variant="outline" className="text-xs">{attachment.type}</Badge>
+                                  {attachment.fileSize && (
+                                    <>
+                                      <span>·</span>
+                                      <span>{(attachment.fileSize / 1024).toFixed(1)} KB</span>
+                                    </>
+                                  )}
+                                  <span>·</span>
+                                  <span>{formatDate(attachment.createdAt)}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => window.open(attachment.storagePath, '_blank')}
+                              >
+                                <ExternalLink className="w-4 h-4 mr-1" />
+                                View
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const link = document.createElement('a');
+                                  link.href = attachment.storagePath;
+                                  link.download = attachment.filename;
+                                  link.click();
+                                }}
+                              >
+                                <Download className="w-4 h-4 mr-1" />
+                                Download
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Paperclip className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500">No intake documents uploaded</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Validation Reports */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Validation Reports
+                  </CardTitle>
+                  <CardDescription>
+                    Official validation reports and assessments
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {model.validations && model.validations.some((v) => v.reportStoragePath) ? (
+                    <div className="space-y-3">
+                      {model.validations
+                        .filter((v) => v.reportStoragePath)
+                        .map((validation) => (
+                          <div
+                            key={validation.id}
+                            className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                  validation.overallResult === 'Satisfactory'
+                                    ? 'bg-green-50'
+                                    : validation.overallResult === 'Unsatisfactory'
+                                    ? 'bg-red-50'
+                                    : 'bg-amber-50'
+                                }`}
+                              >
+                                <FileText
+                                  className={`w-5 h-5 ${
+                                    validation.overallResult === 'Satisfactory'
+                                      ? 'text-green-600'
+                                      : validation.overallResult === 'Unsatisfactory'
+                                      ? 'text-red-600'
+                                      : 'text-amber-600'
+                                  }`}
+                                />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900">
+                                  {validation.reportFilename || `${validation.validationType} Validation Report`}
+                                </p>
+                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                  <Badge
+                                    variant="outline"
+                                    className={`text-xs ${
+                                      validation.overallResult === 'Satisfactory'
+                                        ? 'border-green-200 text-green-700'
+                                        : validation.overallResult === 'Unsatisfactory'
+                                        ? 'border-red-200 text-red-700'
+                                        : 'border-amber-200 text-amber-700'
+                                    }`}
+                                  >
+                                    {validation.overallResult || validation.status}
+                                  </Badge>
+                                  <span>·</span>
+                                  <span>{formatDate(validation.validationDate)}</span>
+                                  <span>·</span>
+                                  <span>{validation.validatedBy}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => window.open(validation.reportStoragePath!, '_blank')}
+                              >
+                                <ExternalLink className="w-4 h-4 mr-1" />
+                                View Report
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  router.push(`/manager/inventory/${model.id}/validation/${validation.id}`)
+                                }
+                              >
+                                <ChevronRight className="w-4 h-4 mr-1" />
+                                Details
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500">No validation reports uploaded yet</p>
+                      <p className="text-sm text-gray-400 mt-1">
+                        Reports are attached when validations are completed
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Findings Summary */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5" />
+                    Findings Summary
+                  </CardTitle>
+                  <CardDescription>
+                    Overview of validation findings and remediation status
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {allFindings.length > 0 ? (
+                    <div className="space-y-4">
+                      {/* Stats */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="p-4 bg-gray-50 rounded-lg text-center">
+                          <p className="text-2xl font-bold text-gray-900">{allFindings.length}</p>
+                          <p className="text-sm text-gray-500">Total Findings</p>
+                        </div>
+                        <div className="p-4 bg-red-50 rounded-lg text-center">
+                          <p className="text-2xl font-bold text-red-600">
+                            {allFindings.filter((f) => f.remediationStatus === 'Open').length}
+                          </p>
+                          <p className="text-sm text-red-600">Open</p>
+                        </div>
+                        <div className="p-4 bg-amber-50 rounded-lg text-center">
+                          <p className="text-2xl font-bold text-amber-600">
+                            {allFindings.filter((f) => f.remediationStatus === 'In Progress').length}
+                          </p>
+                          <p className="text-sm text-amber-600">In Progress</p>
+                        </div>
+                        <div className="p-4 bg-green-50 rounded-lg text-center">
+                          <p className="text-2xl font-bold text-green-600">
+                            {allFindings.filter((f) => f.mrmSignedOff).length}
+                          </p>
+                          <p className="text-sm text-green-600">Closed</p>
+                        </div>
+                      </div>
+
+                      {/* Severity Breakdown */}
+                      <div className="border rounded-lg p-4">
+                        <p className="text-sm font-medium text-gray-700 mb-3">By Severity</p>
+                        <div className="grid grid-cols-4 gap-2">
+                          {(['Critical', 'High', 'Medium', 'Low'] as const).map((severity) => {
+                            const count = allFindings.filter((f) => f.severity === severity).length;
+                            return (
+                              <div key={severity} className="text-center">
+                                <Badge className={`${getSeverityColor(severity)} mb-1`}>{severity}</Badge>
+                                <p className="text-lg font-semibold">{count}</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Recent Open Findings */}
+                      {openFindings.length > 0 && (
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 mb-2">Open Findings Requiring Attention</p>
+                          <div className="space-y-2">
+                            {openFindings.slice(0, 3).map((finding) => (
+                              <div
+                                key={finding.id}
+                                className="flex items-center justify-between p-3 bg-red-50 border border-red-100 rounded-lg"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Badge className={getSeverityColor(finding.severity)}>{finding.severity}</Badge>
+                                  <span className="text-sm font-medium">{finding.title}</span>
+                                </div>
+                                <span className="text-xs text-gray-500">{finding.findingNumber}</span>
+                              </div>
+                            ))}
+                            {openFindings.length > 3 && (
+                              <p className="text-sm text-gray-500 text-center mt-2">
+                                +{openFindings.length - 3} more open findings
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <CheckCircle className="w-12 h-12 text-green-300 mx-auto mb-4" />
+                      <p className="text-gray-500">No findings recorded</p>
+                      <p className="text-sm text-gray-400 mt-1">
+                        This model has a clean validation history
+                      </p>
+                    </div>
                   )}
                 </CardContent>
               </Card>

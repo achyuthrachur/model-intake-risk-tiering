@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Bot, User } from 'lucide-react';
 import { parseMessageForInteractiveElements, stripInteractiveMarkup } from '@/lib/chat/parseInteractiveElements';
 import { InteractiveOptions } from './InteractiveOptions';
+import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
 
 interface ChatMessageProps {
   message: {
@@ -50,9 +51,13 @@ export function ChatMessage({ message, onOptionSelect, isLatestAssistant }: Chat
         <p className="text-sm font-medium text-gray-900">
           {isUser ? 'You' : 'AI Assistant'}
         </p>
-        <div className="text-sm text-gray-700 whitespace-pre-wrap">
-          {displayContent}
-        </div>
+        {isUser ? (
+          <div className="text-sm text-gray-700 whitespace-pre-wrap">
+            {displayContent}
+          </div>
+        ) : (
+          <MarkdownRenderer content={displayContent} className="text-sm text-gray-700" />
+        )}
 
         {/* Render interactive options if present and this is the latest assistant message */}
         {parsed?.interactiveElement && isLatestAssistant && onOptionSelect && (
@@ -66,9 +71,7 @@ export function ChatMessage({ message, onOptionSelect, isLatestAssistant }: Chat
 
         {/* Show text after options if any */}
         {parsed?.textAfter && (
-          <div className="text-sm text-gray-700 whitespace-pre-wrap mt-2">
-            {stripJsonBlocks(parsed.textAfter)}
-          </div>
+          <MarkdownRenderer content={stripJsonBlocks(parsed.textAfter)} className="text-sm text-gray-700 mt-2" />
         )}
       </div>
     </div>

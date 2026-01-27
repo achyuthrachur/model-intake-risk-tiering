@@ -23,6 +23,10 @@ import {
   Loader2,
   Send,
   MessageSquare,
+  Upload,
+  Wand2,
+  FileUp,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,6 +48,7 @@ import {
   parseJsonSafe,
 } from '@/lib/utils';
 import type { UseCaseWithRelations } from '@/lib/types';
+import { DropZone } from '@/components/artifacts/DropZone';
 
 export default function OwnerUseCaseDetailPage() {
   const params = useParams();
@@ -56,6 +61,8 @@ export default function OwnerUseCaseDetailPage() {
   const [artifactsConfig, setArtifactsConfig] = useState<any>(null);
   const [aiInsights, setAiInsights] = useState<any>(null);
   const [generatingAI, setGeneratingAI] = useState(false);
+  const [generatingSynthetic, setGeneratingSynthetic] = useState(false);
+  const [uploadedArtifacts, setUploadedArtifacts] = useState<string[]>([]);
 
   const id = params.id as string;
 
@@ -166,6 +173,61 @@ export default function OwnerUseCaseDetailPage() {
       toast({ title: 'Error', description: 'Failed to resubmit', variant: 'destructive' });
     } finally {
       setResubmitting(false);
+    }
+  };
+
+  // Track uploaded artifact IDs from attachments
+  useEffect(() => {
+    if (useCase?.attachments) {
+      const ids = useCase.attachments
+        .filter((a: any) => a.artifactId)
+        .map((a: any) => a.artifactId);
+      setUploadedArtifacts(ids);
+    }
+  }, [useCase?.attachments]);
+
+  const generateSyntheticData = async () => {
+    try {
+      setGeneratingSynthetic(true);
+      const response = await fetch(`/api/usecases/${id}/synthetic-artifacts`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate synthetic data');
+      }
+
+      toast({ title: 'Synthetic Data Generated', description: 'Demo artifacts have been created for this use case' });
+      await fetchUseCase();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to generate synthetic data',
+        variant: 'destructive',
+      });
+    } finally {
+      setGeneratingSynthetic(false);
+    }
+  };
+
+  const handleArtifactUpload = async (attachment: any) => {
+    toast({ title: 'Uploaded', description: `${attachment.filename} has been uploaded successfully` });
+    await fetchUseCase();
+  };
+
+  const handleDeleteAttachment = async (attachmentId: string) => {
+    try {
+      const response = await fetch(`/api/usecases/${id}/attachments/${attachmentId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Failed to delete');
+
+      toast({ title: 'Deleted', description: 'Attachment has been removed' });
+      await fetchUseCase();
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to delete attachment', variant: 'destructive' });
     }
   };
 
@@ -280,37 +342,187 @@ export default function OwnerUseCaseDetailPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Sent Back Feedback Banner */}
+        {/* Sent Back Feedback Banner with Artifact Upload */}
         {isSentBack && (
-          <Card className="mb-6 border-orange-300 bg-orange-50">
-            <CardHeader>
-              <CardTitle className="flex items-center text-orange-800">
-                <MessageSquare className="w-5 h-5 mr-2" />
-                Feedback from Model Risk Manager
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-white p-4 rounded-lg border border-orange-200 mb-4">
-                <p className="text-gray-800 whitespace-pre-wrap">
-                  {useCase.reviewerNotes || 'No specific notes provided. Please review and update your submission.'}
-                </p>
-                {useCase.reviewedBy && (
-                  <p className="text-sm text-gray-500 mt-2">
-                    — {useCase.reviewedBy}, {useCase.reviewedAt ? formatDate(useCase.reviewedAt) : ''}
+          <div className="mb-6 space-y-4">
+            <Card className="border-orange-300 bg-orange-50">
+              <CardHeader>
+                <CardTitle className="flex items-center text-orange-800">
+                  <MessageSquare className="w-5 h-5 mr-2" />
+                  Feedback from Model Risk Manager
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-white p-4 rounded-lg border border-orange-200 mb-4">
+                  <p className="text-gray-800 whitespace-pre-wrap">
+                    {useCase.reviewerNotes || 'No specific notes provided. Please review and update your submission.'}
                   </p>
+                  {useCase.reviewedBy && (
+                    <p className="text-sm text-gray-500 mt-2">
+                      — {useCase.reviewedBy}, {useCase.reviewedAt ? formatDate(useCase.reviewedAt) : ''}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Required Documentation Upload */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center">
+                      <Upload className="w-5 h-5 mr-2" />
+                      Upload Required Documentation
+                    </CardTitle>
+                    <CardDescription>
+                      Upload the required artifacts for your use case. Drag and drop files or click to browse.
+                    </CardDescription>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={generateSyntheticData}
+                    disabled={generatingSynthetic}
+                    className="gap-2"
+                  >
+                    {generatingSynthetic ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Wand2 className="w-4 h-4" />
+                    )}
+                    {generatingSynthetic ? 'Generating...' : 'Generate Demo Data'}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {decision && requiredArtifacts.length > 0 ? (
+                  <div className="space-y-4">
+                    {/* Show current uploads */}
+                    {useCase.attachments && useCase.attachments.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-medium mb-2">Uploaded Files</h4>
+                        <div className="space-y-2">
+                          {useCase.attachments.map((attachment: any) => (
+                            <div
+                              key={attachment.id}
+                              className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
+                            >
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                                <div>
+                                  <p className="text-sm font-medium">{attachment.filename}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {attachment.type} • {formatDate(attachment.createdAt)}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => window.open(attachment.storagePath, '_blank')}
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteAttachment(attachment.id)}
+                                >
+                                  <Trash2 className="w-4 h-4 text-red-500" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Required artifacts with upload */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {requiredArtifacts.slice(0, 6).map((artifactId: string) => {
+                        const artifact = artifactsConfig?.artifacts[artifactId];
+                        const isUploaded = uploadedArtifacts.includes(artifactId);
+                        const existingAttachment = useCase.attachments?.find(
+                          (a: any) => a.artifactId === artifactId
+                        );
+
+                        return (
+                          <div
+                            key={artifactId}
+                            className={`p-4 rounded-lg border ${
+                              isUploaded ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                {isUploaded ? (
+                                  <CheckCircle className="w-5 h-5 text-green-600" />
+                                ) : (
+                                  <AlertCircle className="w-5 h-5 text-amber-500" />
+                                )}
+                                <h4 className="font-medium text-sm">{artifact?.name || artifactId}</h4>
+                              </div>
+                            </div>
+                            <p className="text-xs text-gray-500 mb-3">{artifact?.description}</p>
+                            {!isUploaded && (
+                              <DropZone
+                                useCaseId={id}
+                                artifactId={artifactId}
+                                artifactName={artifact?.name}
+                                type={artifact?.category || 'Other'}
+                                onUploadComplete={handleArtifactUpload}
+                                onUploadError={(error) => toast({ title: 'Upload Error', description: error, variant: 'destructive' })}
+                                compact
+                              />
+                            )}
+                            {existingAttachment && (
+                              <div className="flex items-center gap-2 text-xs text-green-600 mt-2">
+                                <FileText className="w-3 h-3" />
+                                {existingAttachment.filename}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* General upload for additional documents */}
+                    <div className="mt-4">
+                      <h4 className="text-sm font-medium mb-2">Upload Additional Documents</h4>
+                      <DropZone
+                        useCaseId={id}
+                        type="Other"
+                        onUploadComplete={handleArtifactUpload}
+                        onUploadError={(error) => toast({ title: 'Upload Error', description: error, variant: 'destructive' })}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <FileUp className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500 mb-3">Generate a decision first to see required artifacts</p>
+                    <Button onClick={generateDecision} disabled={generating} size="sm">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Generate Decision
+                    </Button>
+                  </div>
                 )}
-              </div>
-              <div className="flex gap-3">
-                <Button onClick={resubmitForReview} disabled={resubmitting}>
-                  <Send className="w-4 h-4 mr-2" />
-                  {resubmitting ? 'Resubmitting...' : 'Resubmit for Review'}
-                </Button>
-                <p className="text-sm text-orange-700 self-center">
-                  Make any necessary changes and resubmit when ready.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Resubmit Button */}
+            <div className="flex items-center gap-3 bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <Button onClick={resubmitForReview} disabled={resubmitting} size="lg">
+                <Send className="w-4 h-4 mr-2" />
+                {resubmitting ? 'Resubmitting...' : 'Resubmit for Review'}
+              </Button>
+              <p className="text-sm text-blue-700">
+                Once you've uploaded the required documentation, resubmit for MRM review.
+              </p>
+            </div>
+          </div>
         )}
 
         <Tabs defaultValue="summary" className="space-y-6">

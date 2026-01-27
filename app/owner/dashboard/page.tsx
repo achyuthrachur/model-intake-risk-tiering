@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -17,6 +17,8 @@ import {
   ArrowLeft,
   AlertCircle,
   RotateCcw,
+  Wand2,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +32,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/use-toast';
 import { formatDate, getTierBadgeColor, getStatusColor, truncate } from '@/lib/utils';
 import type { UseCaseWithRelations } from '@/lib/types';
 
@@ -43,15 +46,53 @@ interface DashboardStats {
 
 export default function OwnerDashboard() {
   const router = useRouter();
+  const { toast } = useToast();
   const [useCases, setUseCases] = useState<UseCaseWithRelations[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [generatingDemo, setGeneratingDemo] = useState(false);
 
   useEffect(() => {
     fetchUseCases();
   }, []);
+
+  const handleGenerateDemoUseCase = useCallback(async () => {
+    if (generatingDemo) return; // Prevent double-click
+    setGeneratingDemo(true);
+
+    try {
+      const res = await fetch('/api/usecases/demo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'random' }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to create demo use case');
+      }
+
+      const data = await res.json();
+      toast({
+        title: 'Demo Use Case Created',
+        description: `Created: ${data.useCase.title}`,
+      });
+
+      // Navigate to the new use case
+      router.push(`/owner/usecase/${data.useCase.id}`);
+    } catch (error) {
+      console.error('Error creating demo use case:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to create demo use case',
+        variant: 'destructive',
+      });
+    } finally {
+      setGeneratingDemo(false);
+    }
+  }, [generatingDemo, toast, router]);
 
   const fetchUseCases = async () => {
     try {
@@ -121,6 +162,24 @@ export default function OwnerDashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
+              <Button
+                variant="outline"
+                onClick={handleGenerateDemoUseCase}
+                disabled={generatingDemo}
+                className="border-amber-300 text-amber-700 hover:bg-amber-50"
+              >
+                {generatingDemo ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="w-4 h-4 mr-2" />
+                    Demo Data
+                  </>
+                )}
+              </Button>
               <Link href="/owner/intake/chat">
                 <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
                   <MessageSquare className="w-4 h-4 mr-2" />
