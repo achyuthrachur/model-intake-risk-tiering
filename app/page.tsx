@@ -252,7 +252,7 @@ export default function WelcomePage() {
 
                 {/* Value Proposition */}
                 <section className="bg-gradient-to-r from-primary/5 to-purple-50 rounded-lg p-5 border">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Why MRM Professionals Choose This Platform</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">Key Strengths</h3>
                   <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-primary">40+</div>

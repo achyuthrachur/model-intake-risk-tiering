@@ -14,10 +14,18 @@ import {
   Eye,
   Play,
   RefreshCw,
+  ScrollText,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   PolicyUploadDialog,
   PolicyDiffView,
@@ -30,6 +38,7 @@ interface PolicyVersion {
   id: string;
   name: string;
   description?: string;
+  documentContent?: string;
   status: string;
   createdAt: string;
   analyzedAt?: string;
@@ -100,6 +109,9 @@ export default function PolicyManagementPage() {
   // Dialogs
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
+  const [documentViewerOpen, setDocumentViewerOpen] = useState(false);
+  const [documentContent, setDocumentContent] = useState<string | null>(null);
+  const [loadingDocument, setLoadingDocument] = useState(false);
 
   const fetchPolicies = useCallback(async () => {
     try {
@@ -176,6 +188,24 @@ export default function PolicyManagementPage() {
       console.error('Failed to load preview:', error);
     } finally {
       setLoadingPreview(false);
+    }
+  };
+
+  const handleViewDocument = async () => {
+    if (!selectedPolicy) return;
+
+    setLoadingDocument(true);
+    try {
+      const res = await fetch(`/api/policy/${selectedPolicy.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setDocumentContent(data.policy.documentContent || 'No document content available.');
+        setDocumentViewerOpen(true);
+      }
+    } catch (error) {
+      console.error('Failed to fetch document:', error);
+    } finally {
+      setLoadingDocument(false);
     }
   };
 
@@ -428,6 +458,25 @@ export default function PolicyManagementPage() {
                         </div>
                       )}
 
+                      {/* View Document Button - always visible */}
+                      <Button
+                        variant="outline"
+                        onClick={handleViewDocument}
+                        disabled={loadingDocument}
+                      >
+                        {loadingDocument ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          <>
+                            <ScrollText className="h-4 w-4 mr-2" />
+                            View Document
+                          </>
+                        )}
+                      </Button>
+
                       <Button
                         variant="ghost"
                         size="sm"
@@ -489,6 +538,27 @@ export default function PolicyManagementPage() {
           onApprove={handleApply}
         />
       )}
+
+      {/* Document Viewer Dialog */}
+      <Dialog open={documentViewerOpen} onOpenChange={setDocumentViewerOpen}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center gap-2">
+                <ScrollText className="h-5 w-5" />
+                {selectedPolicy?.name || 'Policy Document'}
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto mt-4">
+            <div className="bg-gray-50 rounded-lg p-6 border">
+              <pre className="whitespace-pre-wrap font-mono text-sm text-gray-800 leading-relaxed">
+                {documentContent}
+              </pre>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

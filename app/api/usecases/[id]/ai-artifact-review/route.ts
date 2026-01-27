@@ -224,14 +224,26 @@ Focus on whether the uploaded documentation adequately addresses the requirement
     // Parse AI response
     let aiAnalysis;
     try {
-      // Extract JSON from response
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      // Clean up response - remove markdown code blocks if present
+      let cleanedText = text.trim();
+
+      // Remove ```json or ``` wrapper if present
+      const codeBlockMatch = cleanedText.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (codeBlockMatch) {
+        cleanedText = codeBlockMatch[1].trim();
+      }
+
+      // Extract JSON object from response
+      const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         aiAnalysis = JSON.parse(jsonMatch[0]);
       } else {
+        console.error('No JSON found in AI response:', cleanedText.substring(0, 500));
         throw new Error('No JSON found in response');
       }
-    } catch {
+    } catch (parseError) {
+      console.error('Failed to parse AI artifact review response:', parseError);
+      console.error('Raw response:', text.substring(0, 500));
       aiAnalysis = {
         summary: 'AI analysis could not be parsed. Manual review recommended.',
         recommendations: ['Please review documentation manually.'],
