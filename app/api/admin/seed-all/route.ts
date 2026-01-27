@@ -555,7 +555,6 @@ export async function POST() {
           humanReviewProcess: data.humanReviewProcess,
           incidentResponseContact: data.incidentResponseContact,
           status: (data as { seedStatus?: string }).seedStatus || 'Submitted',
-          revisionNotes: (data as { revisionNotes?: string }).revisionNotes || null,
           createdBy: 'demo-user',
         },
         include: {
