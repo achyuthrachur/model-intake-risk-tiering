@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Save, Send, Check, BarChart3 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save, Send, Check, BarChart3, FileUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +25,7 @@ import {
   REGULATORY_DOMAINS,
   type UseCaseFormData,
 } from '@/lib/types';
+import { IntakeArtifactStep } from '@/components/artifacts/IntakeArtifactStep';
 
 const steps = [
   { id: 1, name: 'Overview', description: 'Basic information' },
@@ -32,7 +33,8 @@ const steps = [
   { id: 3, name: 'Model Details', description: 'Technical details' },
   { id: 4, name: 'Data & Privacy', description: 'Data handling' },
   { id: 5, name: 'Controls', description: 'Monitoring and controls' },
-  { id: 6, name: 'Review', description: 'Review and submit' },
+  { id: 6, name: 'Artifacts', description: 'Upload documentation' },
+  { id: 7, name: 'Review', description: 'Review and submit' },
 ];
 
 const defaultFormData: UseCaseFormData = {
@@ -67,12 +69,23 @@ const defaultFormData: UseCaseFormData = {
   incidentResponseContact: '',
 };
 
+interface ArtifactStatus {
+  artifactId: string;
+  status: 'not_provided' | 'uploaded' | 'synthetic' | 'uploading' | 'generating';
+  file?: { name: string; size: number };
+  attachmentId?: string;
+}
+
 export default function OwnerNewIntakePage() {
   const router = useRouter();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<UseCaseFormData>(defaultFormData);
   const [saving, setSaving] = useState(false);
+  // Track draft use case ID for artifact uploads
+  const [draftUseCaseId, setDraftUseCaseId] = useState<string | null>(null);
+  // Track uploaded artifacts
+  const [uploadedArtifacts, setUploadedArtifacts] = useState<Record<string, ArtifactStatus>>({});
 
   const updateForm = (field: keyof UseCaseFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -112,20 +125,40 @@ export default function OwnerNewIntakePage() {
     try {
       setSaving(true);
 
-      const createResponse = await fetch('/api/usecases', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      let useCaseId = draftUseCaseId;
 
-      if (!createResponse.ok) {
-        const errorData = await createResponse.json();
-        throw new Error(errorData.error || 'Failed to create use case');
+      // If we have a draft, update it; otherwise create new
+      if (useCaseId) {
+        // Update the existing draft with latest form data
+        const updateResponse = await fetch(`/api/usecases/${useCaseId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+
+        if (!updateResponse.ok) {
+          const errorData = await updateResponse.json();
+          throw new Error(errorData.error || 'Failed to update use case');
+        }
+      } else {
+        // Create new use case
+        const createResponse = await fetch('/api/usecases', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+
+        if (!createResponse.ok) {
+          const errorData = await createResponse.json();
+          throw new Error(errorData.error || 'Failed to create use case');
+        }
+
+        const useCase = await createResponse.json();
+        useCaseId = useCase.id;
       }
 
-      const useCase = await createResponse.json();
-
-      const submitResponse = await fetch(`/api/usecases/${useCase.id}/submit`, {
+      // Submit for review
+      const submitResponse = await fetch(`/api/usecases/${useCaseId}/submit`, {
         method: 'POST',
       });
 
@@ -135,7 +168,7 @@ export default function OwnerNewIntakePage() {
       }
 
       toast({ title: 'Submitted', description: 'Use case submitted for review' });
-      router.push(`/owner/usecase/${useCase.id}`);
+      router.push(`/owner/usecase/${useCaseId}`);
     } catch (error) {
       console.error('Submit error:', error);
       toast({
@@ -146,6 +179,23 @@ export default function OwnerNewIntakePage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  // Handle artifact upload callbacks
+  const handleUseCaseCreated = (id: string) => {
+    setDraftUseCaseId(id);
+  };
+
+  const handleArtifactUploaded = (artifactId: string, attachment: any) => {
+    setUploadedArtifacts(prev => ({
+      ...prev,
+      [artifactId]: {
+        artifactId,
+        status: attachment.isSynthetic ? 'synthetic' : 'uploaded',
+        file: { name: attachment.filename, size: attachment.fileSize || 0 },
+        attachmentId: attachment.id,
+      },
+    }));
   };
 
   const canProceed = () => {
@@ -659,8 +709,19 @@ export default function OwnerNewIntakePage() {
                   </>
                 )}
 
-                {/* Step 6: Review */}
+                {/* Step 6: Artifacts */}
                 {currentStep === 6 && (
+                  <IntakeArtifactStep
+                    formData={formData}
+                    useCaseId={draftUseCaseId}
+                    onUseCaseCreated={handleUseCaseCreated}
+                    onArtifactUploaded={handleArtifactUploaded}
+                    uploadedArtifacts={uploadedArtifacts}
+                  />
+                )}
+
+                {/* Step 7: Review */}
+                {currentStep === 7 && (
                   <div className="space-y-6">
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <h4 className="font-medium text-blue-900 mb-2">Ready to Submit</h4>
@@ -720,6 +781,27 @@ export default function OwnerNewIntakePage() {
                           <dd>{formData.regulatoryDomains.join(', ') || 'None'}</dd>
                         </dl>
                       </div>
+
+                      {/* Artifacts Summary */}
+                      {Object.keys(uploadedArtifacts).length > 0 && (
+                        <div className="border rounded-lg p-4">
+                          <h5 className="font-medium text-gray-700 mb-2 flex items-center gap-2">
+                            <FileUp className="w-4 h-4" />
+                            Artifacts Provided
+                          </h5>
+                          <ul className="text-sm space-y-1">
+                            {Object.values(uploadedArtifacts).map((artifact) => (
+                              <li key={artifact.artifactId} className="flex items-center gap-2">
+                                <Check className="w-4 h-4 text-green-500" />
+                                <span>{artifact.file?.name}</span>
+                                {artifact.status === 'synthetic' && (
+                                  <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded">Demo</span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -735,12 +817,12 @@ export default function OwnerNewIntakePage() {
                     Previous
                   </Button>
 
-                  {currentStep < 6 ? (
+                  {currentStep < 7 ? (
                     <Button
-                      onClick={() => setCurrentStep((prev) => Math.min(6, prev + 1))}
+                      onClick={() => setCurrentStep((prev) => Math.min(7, prev + 1))}
                       disabled={!canProceed()}
                     >
-                      Next
+                      {currentStep === 6 ? 'Skip' : 'Next'}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   ) : (

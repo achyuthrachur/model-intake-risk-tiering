@@ -49,6 +49,7 @@ import {
 } from '@/lib/utils';
 import type { UseCaseWithRelations } from '@/lib/types';
 import { DropZone } from '@/components/artifacts/DropZone';
+import { ArtifactUploadCard } from '@/components/artifacts/ArtifactUploadCard';
 
 export default function OwnerUseCaseDetailPage() {
   const params = useParams();
@@ -915,32 +916,26 @@ export default function OwnerUseCaseDetailPage() {
                     <CardContent>
                       <div className="space-y-3">
                         {artifacts.map((artifact: any) => (
-                          <div
+                          <ArtifactUploadCard
                             key={artifact.id}
-                            className={`p-4 rounded-lg border ${
-                              artifact.isMissing ? 'bg-amber-50 border-amber-200' : 'bg-gray-50'
-                            }`}
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start">
-                                {artifact.isMissing ? (
-                                  <AlertCircle className="w-5 h-5 text-amber-500 mr-3 mt-0.5" />
-                                ) : (
-                                  <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5" />
-                                )}
-                                <div>
-                                  <h4 className="font-medium">{artifact.name}</h4>
-                                  <p className="text-sm text-gray-600 mt-1">{artifact.description}</p>
-                                  <p className="text-xs text-gray-500 mt-2">Owner: {artifact.ownerRole}</p>
-                                </div>
-                              </div>
-                              {artifact.isMissing && (
-                                <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-200">
-                                  Missing
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
+                            artifact={{
+                              id: artifact.id,
+                              name: artifact.name,
+                              description: artifact.description,
+                              category: artifact.category,
+                              ownerRole: artifact.ownerRole,
+                              whatGoodLooksLike: artifact.whatGoodLooksLike,
+                            }}
+                            isMissing={artifact.isMissing}
+                            useCaseId={id}
+                            existingAttachments={useCase?.attachments?.map((a: any) => ({
+                              ...a,
+                              createdAt: a.createdAt.toString(),
+                            }))}
+                            showAnalyze={true}
+                            onUploadComplete={() => fetchUseCase()}
+                            onDeleteComplete={() => fetchUseCase()}
+                          />
                         ))}
                       </div>
                     </CardContent>

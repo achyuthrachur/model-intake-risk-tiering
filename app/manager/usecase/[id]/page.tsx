@@ -56,6 +56,7 @@ import {
   parseJsonSafe,
 } from '@/lib/utils';
 import type { UseCaseWithRelations } from '@/lib/types';
+import { ArtifactUploadCard } from '@/components/artifacts/ArtifactUploadCard';
 
 export default function ManagerUseCaseReviewPage() {
   const params = useParams();
@@ -1005,11 +1006,23 @@ export default function ManagerUseCaseReviewPage() {
                               className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors"
                             >
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                  <FileText className="w-5 h-5 text-blue-600" />
+                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                  attachment.isSynthetic ? 'bg-amber-100' : 'bg-blue-100'
+                                }`}>
+                                  <FileText className={`w-5 h-5 ${
+                                    attachment.isSynthetic ? 'text-amber-600' : 'text-blue-600'
+                                  }`} />
                                 </div>
                                 <div>
-                                  <p className="font-medium text-sm">{attachment.filename}</p>
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-medium text-sm">{attachment.filename}</p>
+                                    {attachment.isSynthetic && (
+                                      <Badge variant="outline" className="text-xs bg-amber-50 text-amber-600 border-amber-200">
+                                        <Sparkles className="w-3 h-3 mr-1" />
+                                        Demo
+                                      </Badge>
+                                    )}
+                                  </div>
                                   <div className="flex items-center gap-2 text-xs text-gray-500">
                                     <span>{attachment.type}</span>
                                     {artifact && (
@@ -1064,7 +1077,7 @@ export default function ManagerUseCaseReviewPage() {
                   </Card>
                 )}
 
-                {/* Required Artifacts Checklist */}
+                {/* Required Artifacts Checklist with Analysis */}
                 {Object.entries(groupedArtifacts).map(([category, artifacts]) => (
                   <Card key={category}>
                     <CardHeader>
@@ -1075,61 +1088,28 @@ export default function ManagerUseCaseReviewPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {artifacts.map((artifact: any) => {
-                          const uploadedFile = useCase.attachments?.find(
-                            (a: any) => a.artifactId === artifact.id
-                          );
-                          return (
-                            <div
-                              key={artifact.id}
-                              className={`p-4 rounded-lg border ${
-                                artifact.isMissing ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'
-                              }`}
-                            >
-                              <div className="flex items-start justify-between">
-                                <div className="flex items-start">
-                                  {artifact.isMissing ? (
-                                    <AlertCircle className="w-5 h-5 text-amber-500 mr-3 mt-0.5" />
-                                  ) : (
-                                    <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5" />
-                                  )}
-                                  <div>
-                                    <h4 className="font-medium">{artifact.name}</h4>
-                                    <p className="text-sm text-gray-600 mt-1">{artifact.description}</p>
-                                    {uploadedFile && (
-                                      <p className="text-xs text-green-600 mt-2 flex items-center">
-                                        <FileText className="w-3 h-3 mr-1" />
-                                        {uploadedFile.filename}
-                                      </p>
-                                    )}
-                                    <p className="text-xs text-gray-500 mt-1">Owner: {artifact.ownerRole}</p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  {uploadedFile && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => window.open(uploadedFile.storagePath, '_blank')}
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </Button>
-                                  )}
-                                  <Badge
-                                    variant="outline"
-                                    className={
-                                      artifact.isMissing
-                                        ? 'bg-amber-100 text-amber-700 border-amber-200'
-                                        : 'bg-green-100 text-green-700 border-green-200'
-                                    }
-                                  >
-                                    {artifact.isMissing ? 'Missing' : 'Provided'}
-                                  </Badge>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
+                        {artifacts.map((artifact: any) => (
+                          <ArtifactUploadCard
+                            key={artifact.id}
+                            artifact={{
+                              id: artifact.id,
+                              name: artifact.name,
+                              description: artifact.description,
+                              category: artifact.category,
+                              ownerRole: artifact.ownerRole,
+                              whatGoodLooksLike: artifact.whatGoodLooksLike,
+                            }}
+                            isMissing={artifact.isMissing}
+                            useCaseId={id}
+                            existingAttachments={useCase.attachments?.map((a: any) => ({
+                              ...a,
+                              createdAt: a.createdAt.toString(),
+                            }))}
+                            showAnalyze={true}
+                            onUploadComplete={() => fetchUseCase()}
+                            onDeleteComplete={() => fetchUseCase()}
+                          />
+                        ))}
                       </div>
                     </CardContent>
                   </Card>

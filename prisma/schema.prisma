@@ -91,6 +91,7 @@ model Attachment {
   storagePath String
   fileSize    Int?
   mimeType    String?
+  isSynthetic Boolean  @default(false) // True if this is a demo/example artifact
   createdAt   DateTime @default(now())
 }
 
